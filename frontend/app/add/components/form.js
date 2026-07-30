@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { addNewRecipe } from "@/shared/services/recipeService";
+import { logoutUser } from "@/shared/services/authService";
 import { createRecipeDto } from "../utils/createRecipeDto";
 import { validateRecipe } from "../utils/recipeValidation";
 import {
@@ -106,6 +107,13 @@ export default function Form() {
 
             router.push("/view");
         } catch (error) {
+            // Redirects to login if the token is invalid
+            if (error.message.includes("login")) {
+                logoutUser();
+                router.replace("/login");
+                return;
+            }
+
             alert(error.message);
         }
     };

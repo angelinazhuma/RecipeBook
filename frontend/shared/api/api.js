@@ -1,15 +1,39 @@
 
+import {
+    getToken,
+} from "../services/authService";
+
 const API_URL =
     process.env.NEXT_PUBLIC_API_URL || "http://172.17.222.129:8080";
 
 // GET /recipes
 export async function fetchAllRecipes() {
-    const response = await fetch(`${API_URL}/recipes`);
+    // Gets the saved JWT token
+    const token = getToken();
 
-    console.log("GET status:", response.status);
+    if (!token) {
+        throw new Error("Please login first");
+    }
+
+    const response = await fetch(
+        `${API_URL}/recipes`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
 
     if (!response.ok) {
-        throw new Error("Failed to load recipes");
+        if (response.status === 401) {
+            throw new Error(
+                "Your login has expired. Please login again."
+            );
+        }
+
+        throw new Error(
+            "Failed to load recipes"
+        );
     }
 
     return response.json();
@@ -17,19 +41,41 @@ export async function fetchAllRecipes() {
 
 // POST /recipes
 export async function postRecipe(recipe) {
-    const response = await fetch(`${API_URL}/recipes`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(recipe),
-    });
+    // Gets the saved JWT token
+    const token = getToken();
 
-    console.log("POST status:", response.status);
+    if (!token) {
+        throw new Error("Please login first");
+    }
+
+    const response = await fetch(
+        `${API_URL}/recipes`,
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+
+            body: JSON.stringify(recipe),
+        }
+    );
 
     if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
+        if (response.status === 401) {
+            throw new Error(
+                "Your login has expired. Please login again."
+            );
+        }
+
+        const errorText =
+            await response.text();
+
+        throw new Error(
+            errorText ||
+            "Failed to create recipe"
+        );
     }
 
     return response.json();
@@ -37,11 +83,33 @@ export async function postRecipe(recipe) {
 
 // DELETE /recipes/{id}
 export async function removeRecipe(id) {
-    const response = await fetch(`${API_URL}/recipes/${id}`, {
-        method: "DELETE",
-    });
+    // Gets the saved JWT token
+    const token = getToken();
+
+    if (!token) {
+        throw new Error("Please login first");
+    }
+
+    const response = await fetch(
+        `${API_URL}/recipes/${id}`,
+        {
+            method: "DELETE",
+
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
 
     if (!response.ok) {
-        throw new Error("Failed to delete recipe");
+        if (response.status === 401) {
+            throw new Error(
+                "Your login has expired. Please login again."
+            );
+        }
+
+        throw new Error(
+            "Failed to delete recipe"
+        );
     }
 }

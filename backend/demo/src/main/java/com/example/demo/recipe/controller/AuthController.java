@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.demo.recipe.security.JwtService;
 
 // controller gets http-requests and calls service methods
 
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
   private final UserService userService;
+  private final JwtService jwtService;
 
   @PostMapping("/register")
   public ResponseEntity<RegisterResponseDTO> register(
@@ -45,16 +47,25 @@ public class AuthController {
 
   @PostMapping("/login")
   public ResponseEntity<LoginResponseDTO> login(
-          @Valid @RequestBody LoginRequestDTO request
+          @Valid
+          @RequestBody
+          LoginRequestDTO request
   ) {
+    // checks the login and password
     User user = userService.login(request);
 
-    LoginResponseDTO response = new LoginResponseDTO(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            "Login successful"
-    );
+    // creates a JWT token for the user
+    String token = jwtService.generateToken(user);
+
+    // creates the response with the JWT token
+    LoginResponseDTO response =
+            new LoginResponseDTO(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    "Login successful",
+                    token
+            );
 
     return ResponseEntity.ok(response);
   }
