@@ -33,6 +33,7 @@ public class User {
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 
+
   public User(String username, String email, String passwordHash) {
     this.username = username;
     this.email = email;
