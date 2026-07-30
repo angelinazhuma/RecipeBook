@@ -4,6 +4,7 @@ public record LoginResponseDTO(
         Long id,
         String username,
         String email,
-        String message
+        String message,
+        String token
 ) {
 }
