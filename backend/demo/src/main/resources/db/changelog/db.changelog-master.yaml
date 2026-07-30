@@ -67,4 +67,4 @@ databaseChangeLog: # zdes nahodjtsa izmenenija bazi daniih
             onDelete: CASCADE
 
   - include:
-      file: db.changelog/2026-07-30-create-app-users.yaml
+      file: db/changelog/2026-07-30-create-app-users.yaml
