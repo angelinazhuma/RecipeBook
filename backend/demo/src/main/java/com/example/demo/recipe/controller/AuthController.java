@@ -1,5 +1,7 @@
 package com.example.demo.recipe.controller;
 
+import com.example.demo.recipe.DTO.LoginRequestDTO;
+import com.example.demo.recipe.DTO.LoginResponseDTO;
 import com.example.demo.recipe.DTO.RegisterRequestDTO;
 import com.example.demo.recipe.DTO.RegisterResponseDTO;
 import com.example.demo.recipe.model.User;
@@ -16,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @CrossOrigin(origins = {
-    "http://localhost:3000",
-    "http://172.17.222.129:3000"
+        "http://localhost:3000",
+        "http://172.17.222.129:3000"
 })
 public class AuthController {
 
@@ -25,19 +27,35 @@ public class AuthController {
 
   @PostMapping("/register")
   public ResponseEntity<RegisterResponseDTO> register(
-      @Valid @RequestBody RegisterRequestDTO request
+          @Valid @RequestBody RegisterRequestDTO request
   ) {
     User user = userService.register(request);
 
     RegisterResponseDTO response = new RegisterResponseDTO(
-        user.getId(),
-        user.getUsername(),
-        user.getEmail(),
-        user.getCreatedAt()
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getCreatedAt()
     );
 
     return ResponseEntity
-        .status(HttpStatus.CREATED)
-        .body(response);
+            .status(HttpStatus.CREATED)
+            .body(response);
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<LoginResponseDTO> login(
+          @Valid @RequestBody LoginRequestDTO request
+  ) {
+    User user = userService.login(request);
+
+    LoginResponseDTO response = new LoginResponseDTO(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            "Login successful"
+    );
+
+    return ResponseEntity.ok(response);
   }
 }

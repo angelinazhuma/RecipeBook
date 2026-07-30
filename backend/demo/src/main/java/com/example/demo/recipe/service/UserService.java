@@ -1,5 +1,6 @@
 package com.example.demo.recipe.service;
 
+import com.example.demo.recipe.DTO.LoginRequestDTO;
 import com.example.demo.recipe.DTO.RegisterRequestDTO;
 import com.example.demo.recipe.model.User;
 import com.example.demo.recipe.repository.UserRepository;
@@ -38,5 +39,29 @@ public class UserService {
 
     //then makes entity
     return userRepository.save(user);
+
+
   }
+
+  public User login(LoginRequestDTO request) {
+
+    User user = userRepository.findByUsername(request.getLogin())
+            .orElseGet(() -> userRepository.findByEmail(request.getLogin())
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Invalid username/email or password")
+                    ));
+
+    boolean passwordMatches = passwordEncoder.matches(
+            request.getPassword(),
+            user.getPasswordHash()
+    );
+
+    if (!passwordMatches) {
+      throw new IllegalArgumentException("Invalid username/email or password");
+    }
+
+    return user;
+  }
+
+
 }
