@@ -1,0 +1,70 @@
+databaseChangeLog: # zdes nahodjtsa izmenenija bazi daniih
+  - changeSet:
+      id: 001-create-recipes
+      author: angelina
+      changes:
+        - createTable:
+            tableName: recipes
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true # уникально едля каждого рецепта
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: author
+                  type: VARCHAR(255)
+              - column:
+                  name: recipe_description
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+
+  - changeSet:
+      id: 002-create-ingredients
+      author: angelina
+      changes:
+        - createTable:
+            tableName: ingredients
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: recipe_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: double precision
+              - column:
+                  name: unit
+                  type: varchar(50)
+        - addForeignKeyConstraint:
+            baseTableName: ingredients
+            baseColumnNames: recipe_id
+            referencedTableName: recipes
+            referencedColumnNames: id
+            constraintName: fk_ingredietns_recipe
+            onDelete: CASCADE
+
+  - include:
+      file: db.changelog/2026-07-30-create-app-users.yaml

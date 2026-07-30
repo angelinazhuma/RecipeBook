@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin # тemurin бесплатная сборка Java
+          java-version: "21"
+
+      - name: Start database
+        run: docker compose up -d db
+
+      - name: Wait for database
+        run: |
+          for i in {1..30}; do
+            if docker compose exec -T db sh -c 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Run backend tests
+        working-directory: backend/demo
+        run: mvn --batch-mode clean test
+
+      - name: Build and start project
+        run: docker compose up --build -d
+
+      - name: Check backend
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:8080/recipes; then
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose logs backend
+          exit 1
+
+      - name: Check frontend
+        run: curl http://localhost:3000
+
+      - name: Check database
+        run: docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"'
+
+      - name: Stop project
+        if: always()
+        run: docker compose down

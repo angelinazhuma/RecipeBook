@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/recipe_book #java технологий которая позволяет программе общатся с базой данныз
+    username: postgres
+    password: postgres
+
+  jpa: # библиотека котрая связывает базы данныз и йава классы
+    hibernate: # реализует jpa
+      ddl-auto: validate # создание таблиц, проверяет существует ли таблица
+    show-sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    change-log:
+
+server:
+    address: 0.0.0.0
+    port: 8080
