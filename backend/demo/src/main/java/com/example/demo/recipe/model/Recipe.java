@@ -2,6 +2,7 @@ package com.example.demo.recipe.model;
 
 // описывает рецепт, соотвествует таблице в базе данных,
 // спринг бут и jta используют этот класс для соханения и получения рецептов из базы данных
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,6 +16,11 @@ import lombok.Setter;
 @Entity //говорит йаве что класс связан с таблицей в базе
 @Table(name = "recipes")
 public class Recipe {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

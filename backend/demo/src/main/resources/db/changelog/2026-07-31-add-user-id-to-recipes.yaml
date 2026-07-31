@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-user-id-to-recipes
+      author: angelina
+      changes:
+        - addColumn:
+            tableName: recipes
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableName: recipes
+            baseColumnNames: user_id
+            referencedTableName: app_users
+            referencedColumnNames: id
+            constraintName: fk_recipes_user
+            onDelete: CASCADE

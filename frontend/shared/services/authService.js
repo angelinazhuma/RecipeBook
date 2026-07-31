@@ -4,14 +4,8 @@ import {
 } from "../api/authApi";
 
 // logs in the user and saves the JWT token
-export async function loginUser(
-    login,
-    password
-) {
-    const userData = await loginRequest(
-        login,
-        password
-    );
+export async function loginUser(credentials) {
+    const userData = await loginRequest(credentials);
 
     localStorage.setItem(
         "token",
@@ -22,16 +16,8 @@ export async function loginUser(
 }
 
 // Registers a new user
-export async function registerUser(
-    username,
-    email,
-    password
-) {
-    return registerRequest(
-        username,
-        email,
-        password
-    );
+export async function registerUser(userData) {
+    return registerRequest(userData);
 }
 
 // returns the saved JWT token

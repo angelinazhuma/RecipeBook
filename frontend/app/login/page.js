@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import {
     loginUser,
@@ -18,84 +19,81 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] =
         useState(false);
 
-    // Sends the login form
-    const handleSubmit = async (event) => {
+    async function handleSubmit(event) {
         event.preventDefault();
 
-        // Removes the previous error
         setError("");
-
-        if (!login.trim() || !password) {
-            setError(
-                "Enter your username/email and password"
-            );
-            return;
-        }
+        setIsLoading(true);
 
         try {
-            // Disables the button during the request
-            setIsLoading(true);
+            await loginUser({
+                login,
+                password,
+            });
 
-            await loginUser(
-                login.trim(),
-                password
+            router.push("/");
+        } catch (err) {
+            setError(
+                err.message || "Login failed"
             );
-
-            // Opens the recipes page after login
-            router.push("/view");
-        } catch (error) {
-            setError(error.message);
         } finally {
-            // Enables the button after the request
             setIsLoading(false);
         }
-    };
+    }
 
     return (
-        <section className="card">
-            <h2>Login</h2>
+        <main className="auth-page">
+            <h1>Login</h1>
 
             <form
-                className="form"
+                className="auth-form"
                 onSubmit={handleSubmit}
             >
                 <label htmlFor="login">
                     Username or email
-                </label>
 
-                <input
-                    id="login"
-                    type="text"
-                    placeholder="Username or email"
-                    value={login}
-                    onChange={(event) =>
-                        setLogin(event.target.value)
-                    }
-                />
+                    <input
+                        id="login"
+                        type="text"
+                        placeholder="Username or email"
+                        value={login}
+                        onChange={(event) =>
+                            setLogin(
+                                event.target.value
+                            )
+                        }
+                        required
+                    />
+                </label>
 
                 <label htmlFor="password">
                     Password
+
+                    <input
+                        id="password"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(event) =>
+                            setPassword(
+                                event.target.value
+                            )
+                        }
+                        required
+                    />
                 </label>
 
-                <input
-                    id="password"
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(event) =>
-                        setPassword(event.target.value)
-                    }
-                />
-
                 {error && (
-                    <p role="alert">
+                    <p
+                        className="error-message"
+                        role="alert"
+                    >
                         {error}
                     </p>
                 )}
 
                 <button
                     type="submit"
-                    className="add-button"
                     disabled={isLoading}
                 >
                     {isLoading
@@ -103,6 +101,13 @@ export default function LoginPage() {
                         : "Login"}
                 </button>
             </form>
-        </section>
+
+            <p className="auth-link">
+                Don&apos;t have an account?{" "}
+                <Link href="/register">
+                    Register
+                </Link>
+            </p>
+        </main>
     );
 }

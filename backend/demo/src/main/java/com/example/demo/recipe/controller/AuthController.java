@@ -18,10 +18,6 @@ import com.example.demo.recipe.security.JwtService;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {
-        "http://localhost:3000",
-        "http://172.17.222.129:3000"
-})
 public class AuthController {
 
   private final UserService userService;

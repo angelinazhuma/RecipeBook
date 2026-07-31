@@ -4,6 +4,7 @@ import com.example.demo.recipe.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -12,14 +13,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  // checks JWT tokens before protected requests
-  private final JwtAuthenticationFilter
-          jwtAuthenticationFilter;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -28,49 +32,95 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(
-          HttpSecurity http
+      HttpSecurity http
   ) throws Exception {
 
     http
-            // CSRF is disabled because the API uses JWT
-            .csrf(csrf -> csrf.disable())
-
-            // the server does not store user sessions
-            .sessionManagement(session ->
-                    session.sessionCreationPolicy(
-                            SessionCreationPolicy.STATELESS
-                    )
+        .cors(cors ->
+            cors.configurationSource(
+                corsConfigurationSource()
             )
+        )
 
-            // configures public and protected routes
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(
-                            "/auth/register",
-                            "/auth/login"
-                    ).permitAll()
+        .csrf(csrf -> csrf.disable())
 
-                    .requestMatchers(
-                            "/recipes/**"
-                    ).authenticated()
-
-                    .anyRequest().authenticated()
+        .sessionManagement(session ->
+            session.sessionCreationPolicy(
+                SessionCreationPolicy.STATELESS
             )
+        )
 
-            // returns 401 when authentication is missing
-            .exceptionHandling(exception ->
-                    exception.authenticationEntryPoint(
-                            new HttpStatusEntryPoint(
-                                    HttpStatus.UNAUTHORIZED
-                            )
-                    )
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(
+                HttpMethod.OPTIONS,
+                "/**"
+            ).permitAll()
+
+            .requestMatchers(
+                "/auth/register",
+                "/auth/login"
+            ).permitAll()
+
+            .requestMatchers(
+                "/recipes/**"
+            ).authenticated()
+
+            .anyRequest().authenticated()
+        )
+
+        .exceptionHandling(exception ->
+            exception.authenticationEntryPoint(
+                new HttpStatusEntryPoint(
+                    HttpStatus.UNAUTHORIZED
+                )
             )
+        )
 
-            // runs the JWT filter before Spring authentication
-            .addFilterBefore(
-                    jwtAuthenticationFilter,
-                    UsernamePasswordAuthenticationFilter.class
-            );
+        .addFilterBefore(
+            jwtAuthenticationFilter,
+            UsernamePasswordAuthenticationFilter.class
+        );
 
     return http.build();
+  }
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration =
+        new CorsConfiguration();
+
+    configuration.setAllowedOriginPatterns(List.of(
+        "http://localhost:3000",
+        "http://172.*.*.*:3000"
+    ));
+
+    configuration.setAllowedMethods(List.of(
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS"
+    ));
+
+    configuration.setAllowedHeaders(List.of(
+        "Authorization",
+        "Content-Type"
+    ));
+
+    configuration.setExposedHeaders(List.of(
+        "Authorization"
+    ));
+
+    configuration.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source =
+        new UrlBasedCorsConfigurationSource();
+
+    source.registerCorsConfiguration(
+        "/**",
+        configuration
+    );
+
+    return source;
   }
 }

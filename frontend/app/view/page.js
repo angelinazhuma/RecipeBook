@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 import {
     deleteRecipe,
     getAllRecipes,
-} from "../../shared/services/recipeService";
+} from "@/shared/services/recipeService";
 
 import {
     getToken,
     logoutUser,
-} from "../../shared/services/authService";
+} from "@/shared/services/authService";
 
 import List from "./components/list";
 

@@ -10,7 +10,7 @@ import {
 export default function Navigation() {
     const router = useRouter();
 
-    // Removes the token and opens the login page
+    // removes the token and opens the login page
     const handleLogout = () => {
         logoutUser();
         router.push("/login");
