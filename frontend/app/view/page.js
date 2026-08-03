@@ -28,7 +28,7 @@ export default function ViewRecipesPage() {
         useState("");
 
     useEffect(() => {
-        // Redirects to login if there is no token
+        // redirects to login if there is no token
         if (!getToken()) {
             router.replace("/login");
             return;

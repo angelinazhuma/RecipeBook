@@ -11,10 +11,6 @@ export async function fetchAllRecipes() {
     // Gets the saved JWT token
     const token = getToken();
 
-    if (!token) {
-        throw new Error("Please login first");
-    }
-
     const response = await fetch(
         `${API_URL}/recipes`,
         {
@@ -43,10 +39,6 @@ export async function fetchAllRecipes() {
 export async function postRecipe(recipe) {
     // Gets the saved JWT token
     const token = getToken();
-
-    if (!token) {
-        throw new Error("Please login first");
-    }
 
     const response = await fetch(
         `${API_URL}/recipes`,
@@ -86,9 +78,6 @@ export async function removeRecipe(id) {
     // Gets the saved JWT token
     const token = getToken();
 
-    if (!token) {
-        throw new Error("Please login first");
-    }
 
     const response = await fetch(
         `${API_URL}/recipes/${id}`,

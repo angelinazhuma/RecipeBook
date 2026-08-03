@@ -13,7 +13,7 @@ export default function AddRecipePage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Redirects to login if there is no token
+        // redirects to login if there is no token
         if (!getToken()) {
             router.replace("/login");
         }

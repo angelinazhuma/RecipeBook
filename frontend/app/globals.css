@@ -4,7 +4,7 @@
 
 body {
   margin: 0;
-  background: linear-gradient(135deg, #e6f2dd, #f7eadf);
+  background: #F7EADF;
   color: #2d1b12;
   font-family: Arial, sans-serif;
 }
@@ -122,7 +122,7 @@ button {
 }
 
 .recipe-card {
-  background: #fffdf9;
+  background: rgba(255, 255, 255, 0.65);
   border-radius: 24px;
   padding: 24px;
   box-shadow: 0 14px 35px rgba(88, 58, 35, 0.12);
@@ -209,19 +209,12 @@ textarea {
 .navigation {
   display: flex;
   justify-content: center;
-  gap: 18px;
-  margin-top: 25px;
-}
-
-
-.navigation a,.navigation {
-  display: flex;
-  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 25px;
 }
+
 
 .navigation a,
 .navigation a:visited {
@@ -272,7 +265,7 @@ textarea {
   max-width: 520px;
   margin: 70px auto;
   padding: 32px;
-  background: #f7f3e8;
+  background: #FFF7EF;
   border: 1px solid #ddd3bd;
   border-radius: 24px;
   box-shadow: 0 14px 40px rgba(54, 43, 24, 0.08);
@@ -392,4 +385,42 @@ textarea {
 
 .auth-link a:active {
   color: #5a4328;
+}
+
+
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.45);
+  color: #5f482b;
+
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition:
+          background-color 0.2s ease,
+          border-color 0.2s ease,
+          color 0.2s ease,
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+}
+
+.logout-button:hover {
+  color: #ffffff;
+  background: #6f5532;
+  border-color: #6f5532;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(89, 67, 40, 0.18);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+  box-shadow: none;
 }

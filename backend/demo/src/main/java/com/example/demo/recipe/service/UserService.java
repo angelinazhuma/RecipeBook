@@ -48,7 +48,7 @@ public class UserService {
     User user = userRepository.findByUsername(request.getLogin())
             .orElseGet(() -> userRepository.findByEmail(request.getLogin())
                     .orElseThrow(() ->
-                            new IllegalArgumentException("Invalid username/email or password")
+                            new IllegalArgumentException("User not found")
                     ));
 
     boolean passwordMatches = passwordEncoder.matches(
@@ -57,7 +57,7 @@ public class UserService {
     );
 
     if (!passwordMatches) {
-      throw new IllegalArgumentException("Invalid username/email or password");
+      throw new IllegalArgumentException("Incorrect password");
     }
 
     return user;
