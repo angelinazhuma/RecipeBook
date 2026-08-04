@@ -81,7 +81,8 @@ public class JwtAuthenticationFilter
           UsernamePasswordAuthenticationToken authentication =
               new UsernamePasswordAuthenticationToken(
                   user.getUsername(),
-                  null
+                  null,
+                  List.of()
               );
 
           authentication.setDetails(

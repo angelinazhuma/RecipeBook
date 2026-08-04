@@ -1,7 +1,7 @@
 import {getCsrfToken} from "../utils/csrfToken";
 
 const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://172.17.222.129:8080" || "http://localhost:8080";
+    process.env.NEXT_PUBLIC_API_URL || "http://172.17.222.129:8080";
 
 // GET /recipes
 export async function fetchAllRecipes() {

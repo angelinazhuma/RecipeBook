@@ -2,7 +2,7 @@ import {getCsrfToken} from "../utils/csrfToken";
 
 const API_URL =
     process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:8080";
+    "http://172.17.222.129:8080";
 
 export async function loginRequest(credentials) {
     const response = await fetch(
