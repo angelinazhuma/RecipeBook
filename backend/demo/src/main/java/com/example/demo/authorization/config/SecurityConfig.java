@@ -43,16 +43,8 @@ public class SecurityConfig {
             )
         )
 
-        .csrf(csrf -> csrf
-            .csrfTokenRepository(
-                CookieCsrfTokenRepository.withHttpOnlyFalse()
-            )
-            .ignoringRequestMatchers(
-                "/auth/login",
-                "/auth/register",
-                "/auth/logout"
-            )
-        )
+        .csrf(csrf -> csrf.disable())
+
 
         .sessionManagement(session ->
             session.sessionCreationPolicy(
