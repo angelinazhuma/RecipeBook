@@ -1,6 +1,6 @@
-package com.example.demo.recipe.config;
+package com.example.demo.authorization.config;
 
-import com.example.demo.recipe.security.JwtAuthenticationFilter;
+import com.example.demo.authorization.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,7 +29,7 @@ public class SecurityConfig {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
-  }
+  } // BCrypt is a strong password hashing algorithm
 
   @Bean
   public SecurityFilterChain securityFilterChain(
@@ -42,28 +43,37 @@ public class SecurityConfig {
             )
         )
 
-        .csrf(csrf -> csrf.disable())
+        .csrf(csrf -> csrf
+            .csrfTokenRepository(
+                CookieCsrfTokenRepository.withHttpOnlyFalse()
+            )
+            .ignoringRequestMatchers(
+                "/auth/login",
+                "/auth/register",
+                "/auth/logout"
+            )
+        )
 
         .sessionManagement(session ->
             session.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS
             )
-        )
+        ) // disables session management
 
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
                 HttpMethod.OPTIONS,
                 "/**"
-            ).permitAll()
+            ).permitAll() // allows OPTIONS requests for CORS
 
             .requestMatchers(
                 "/auth/register",
-                "/auth/login"
-            ).permitAll()
+                "/auth/login", "/auth/logout"
+            ).permitAll() // allows registration and login requests
 
             .requestMatchers(
-                "/recipes/**"
-            ).authenticated()
+                "/auth/me", "/recipes/**"
+            ).authenticated() // requires authentication for all recipes routes
 
             .anyRequest().authenticated()
         )
@@ -74,12 +84,12 @@ public class SecurityConfig {
                     HttpStatus.UNAUTHORIZED
                 )
             )
-        )
+        ) // handles unauthorized requests with 401 status
 
         .addFilterBefore(
             jwtAuthenticationFilter,
             UsernamePasswordAuthenticationFilter.class
-        );
+        ); // adds JWT authentication filter
 
     return http.build();
   }
@@ -103,13 +113,10 @@ public class SecurityConfig {
     ));
 
     configuration.setAllowedHeaders(List.of(
-        "Authorization",
-        "Content-Type"
+        "Content-Type",
+        "X-XSRF-TOKEN"
     ));
 
-    configuration.setExposedHeaders(List.of(
-        "Authorization"
-    ));
 
     configuration.setAllowCredentials(true);
 
@@ -119,7 +126,7 @@ public class SecurityConfig {
     source.registerCorsConfiguration(
         "/**",
         configuration
-    );
+    ); // applies CORS configuration to all routes
 
     return source;
   }

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import {
     registerUser,
-} from "@/shared/services/authService";
+} from "@/shared/services/registerService";
 
 export default function RegisterForm() {
     const router = useRouter();

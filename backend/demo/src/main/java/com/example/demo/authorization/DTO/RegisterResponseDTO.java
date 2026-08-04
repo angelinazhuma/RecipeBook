@@ -1,4 +1,4 @@
-package com.example.demo.recipe.DTO;
+package com.example.demo.authorization.DTO;
 
 import java.time.LocalDateTime;
 

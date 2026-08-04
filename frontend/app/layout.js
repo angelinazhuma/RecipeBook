@@ -1,7 +1,7 @@
 import "./globals.css";
 
 import Navigation from
-        "../shared/components/navigation";
+        "../shared/components/Navigation";
 
 export const metadata = {
   title: "RecipeBook",

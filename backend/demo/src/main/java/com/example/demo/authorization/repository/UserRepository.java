@@ -1,6 +1,6 @@
-package com.example.demo.recipe.repository;
+package com.example.demo.authorization.repository;
 
-import com.example.demo.recipe.model.User;
+import com.example.demo.authorization.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

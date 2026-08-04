@@ -1,9 +1,9 @@
-package com.example.demo.recipe.service;
+package com.example.demo.authorization.service;
 
-import com.example.demo.recipe.DTO.LoginRequestDTO;
-import com.example.demo.recipe.DTO.RegisterRequestDTO;
-import com.example.demo.recipe.model.User;
-import com.example.demo.recipe.repository.UserRepository;
+import com.example.demo.authorization.DTO.LoginRequestDTO;
+import com.example.demo.authorization.DTO.RegisterRequestDTO;
+import com.example.demo.authorization.model.User;
+import com.example.demo.authorization.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,13 +28,11 @@ public class UserService {
 
     //if everything ok, make user and save to db
 
-    User user = new User();
-
-    user.setUsername(request.getUsername());
-    user.setEmail(request.getEmail());
-
-    // then hashes password
-    user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+    User user = User.builder()
+        .username(request.getUsername())
+        .email(request.getEmail())
+        .passwordHash(passwordEncoder.encode(request.getPassword()))
+        .build();
 
 
     //then makes entity

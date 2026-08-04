@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { addNewRecipe } from "@/shared/services/recipeService";
-import { logoutUser } from "@/shared/services/authService";
+import { logoutUser } from "@/shared/services/logoutService";
 import { createRecipeDto } from "../utils/createRecipeDto";
 import { validateRecipe } from "../utils/recipeValidation";
 import {
@@ -91,31 +91,37 @@ export default function Form() {
             ingredientFields
         );
 
-        try {
-            await addNewRecipe(recipeDto);
+        const result = await addNewRecipe(
+            recipeDto
+        );
 
-            setName("");
-            setAuthor("");
-            setRecipeDescription("");
-            setIngredientFields([
-                {
-                    name: "",
-                    amount: "",
-                    unit: "",
-                },
-            ]);
-
-            router.push("/view");
-        } catch (error) {
-            // Redirects to login if the token is invalid
-            if (error.message.includes("login")) {
-                logoutUser();
+        if (!result.success) {
+            if (result.unauthorized) {
+                await logoutUser();
                 router.replace("/login");
                 return;
             }
 
-            alert(error.message);
+            alert(
+                result.error ||
+                "Failed to create recipe"
+            );
+            return;
         }
+
+        setName("");
+        setAuthor("");
+        setRecipeDescription("");
+
+        setIngredientFields([
+            {
+                name: "",
+                amount: "",
+                unit: "",
+            },
+        ]);
+
+        router.push("/view");
     };
 
     return (

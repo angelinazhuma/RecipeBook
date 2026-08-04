@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import {
     loginUser,
-} from "@/shared/services/authService";
+} from "@/shared/services/loginService";
 
 export default function LoginForm() {
     const router = useRouter();

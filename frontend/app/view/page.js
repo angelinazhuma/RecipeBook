@@ -9,11 +9,14 @@ import {
 } from "@/shared/services/recipeService";
 
 import {
-    getToken,
-    logoutUser,
-} from "@/shared/services/authService";
+    getCurrentUser,
+} from "@/shared/services/currentUserService";
 
-import List from "./components/list";
+import {
+    logoutUser,
+} from "@/shared/services/logoutService";
+
+import List from "./components/List";
 
 export default function ViewRecipesPage() {
     const router = useRouter();
@@ -28,38 +31,51 @@ export default function ViewRecipesPage() {
         useState("");
 
     useEffect(() => {
-        // redirects to login if there is no token
-        if (!getToken()) {
-            router.replace("/login");
-            return;
-        }
-
         let cancelled = false;
 
-        // Loads recipes from the backend
-        getAllRecipes()
-            .then((data) => {
-                if (!cancelled) {
-                    setRecipes(data);
+        // checks authentication through backend
+        getCurrentUser()
+            .then((authResult) => {
+                if (cancelled) {
+                    return null;
                 }
+
+                if (!authResult.authenticated) {
+                    router.replace("/login");
+                    return null;
+                }
+
+                // loads current user's recipes
+                return getAllRecipes();
             })
-            .catch((error) => {
+            .then((recipesResult) => {
+                if (
+                    cancelled ||
+                    recipesResult === null
+                ) {
+                    return;
+                }
+
+                /*
+                 * Supports both possible service formats:
+                 * 1. plain recipe array
+                 * 2. { success, data, error }
+                 */
+                const loadedRecipes =
+                    recipesResult.data ??
+                    recipesResult;
+
+                setRecipes(loadedRecipes);
+            })
+            .catch((requestError) => {
                 if (cancelled) {
                     return;
                 }
 
-                // Removes an invalid or expired token
-                if (
-                    error.message.includes(
-                        "login"
-                    )
-                ) {
-                    logoutUser();
-                    router.replace("/login");
-                    return;
-                }
-
-                setError(error.message);
+                setError(
+                    requestError.message ||
+                    "Failed to load recipes"
+                );
             })
             .finally(() => {
                 if (!cancelled) {
@@ -67,39 +83,58 @@ export default function ViewRecipesPage() {
                 }
             });
 
-        // Prevents state updates after leaving the page
         return () => {
             cancelled = true;
         };
     }, [router]);
 
     // Deletes a selected recipe
-    const handleDelete = async (id) => {
+    const handleDelete = (id) => {
         setError("");
 
-        try {
-            await deleteRecipe(id);
+        deleteRecipe(id)
+            .then((result) => {
+                if (
+                    result &&
+                    result.success === false
+                ) {
+                    setError(
+                        result.error ||
+                        "Failed to delete recipe"
+                    );
+                    return;
+                }
 
-            // Removes the deleted recipe from the page
-            setRecipes((currentRecipes) =>
-                currentRecipes.filter(
-                    (recipe) =>
-                        recipe.id !== id
-                )
-            );
-        } catch (error) {
-            if (
-                error.message.includes(
-                    "login"
-                )
-            ) {
-                logoutUser();
-                router.replace("/login");
-                return;
-            }
+                setRecipes(
+                    (currentRecipes) =>
+                        currentRecipes.filter(
+                            (recipe) =>
+                                recipe.id !== id
+                        )
+                );
+            })
+            .catch((requestError) => {
+                const message =
+                    requestError.message ||
+                    "Failed to delete recipe";
 
-            setError(error.message);
-        }
+                if (
+                    message
+                        .toLowerCase() // ignore case
+                        .includes("login") || // check for login error
+                    message
+                        .toLowerCase() //
+                        .includes("unauthorized") //
+                ) {
+                    logoutUser().finally(() => {
+                        router.replace("/login");
+                    });
+
+                    return;
+                }
+
+                setError(message);
+            });
     };
 
     if (isLoading) {

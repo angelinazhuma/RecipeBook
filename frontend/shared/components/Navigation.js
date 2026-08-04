@@ -11,9 +11,12 @@ import {
 } from "next/navigation";
 
 import {
-    isAuthenticated,
+    getCurrentUser,
+} from "@/shared/services/currentUserService";
+
+import {
     logoutUser,
-} from "@/shared/services/authService";
+} from "@/shared/services/logoutService";
 
 export default function Navigation() {
     const router = useRouter();
@@ -22,18 +25,53 @@ export default function Navigation() {
     const [isLoggedIn, setIsLoggedIn] =
         useState(false);
 
-    // сhecks the token every time the page changes
+    const [isCheckingAuth, setIsCheckingAuth] =
+        useState(true);
+
+    // Checks authentication every time the page changes
     useEffect(() => {
-        setIsLoggedIn(isAuthenticated());
+        let cancelled = false;
+
+        async function checkAuthentication() {
+            setIsCheckingAuth(true);
+
+            const result =
+                await getCurrentUser();
+
+            if (cancelled) {
+                return;
+            }
+
+            setIsLoggedIn(
+                result.authenticated
+            );
+
+            setIsCheckingAuth(false);
+        }
+
+        checkAuthentication();
+
+        return () => {
+            cancelled = true;
+        };
     }, [pathname]);
 
-    const handleLogout = () => {
-        logoutUser();
+    const handleLogout = async () => {
+        const result = await logoutUser();
+
+        if (!result.success) {
+            return;
+        }
+
         setIsLoggedIn(false);
 
         router.replace("/login");
         router.refresh();
     };
+
+    if (isCheckingAuth) {
+        return null;
+    }
 
     return (
         <nav className="navigation">

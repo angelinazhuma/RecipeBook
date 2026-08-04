@@ -1,11 +1,12 @@
 package com.example.demo.recipe.service;
 
+import com.example.demo.authorization.service.CurrentUserService;
 import com.example.demo.recipe.DTO.IngredientDTO;
 import com.example.demo.recipe.DTO.RecipeRequestDTO;
 import com.example.demo.recipe.DTO.RecipeResponseDTO;
 import com.example.demo.recipe.model.Ingredient;
 import com.example.demo.recipe.model.Recipe;
-import com.example.demo.recipe.model.User;
+import com.example.demo.authorization.model.User;
 import com.example.demo.recipe.repository.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 

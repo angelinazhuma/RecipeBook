@@ -1,104 +1,102 @@
-
-import {
-    getToken,
-} from "../services/authService";
+import {getCsrfToken} from "../utils/csrfToken";
 
 const API_URL =
     process.env.NEXT_PUBLIC_API_URL || "http://172.17.222.129:8080" || "http://localhost:8080";
 
 // GET /recipes
 export async function fetchAllRecipes() {
-    // Gets the saved JWT token
-    const token = getToken();
-
     const response = await fetch(
         `${API_URL}/recipes`,
         {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            credentials: "include",
         }
     );
 
-    if (!response.ok) {
-        if (response.status === 401) {
-            throw new Error(
-                "Your login has expired. Please login again."
-            );
-        }
-
-        throw new Error(
-            "Failed to load recipes"
-        );
-    }
-
-    return response.json();
+    return {
+        success: true,
+        data: await response.json(),
+    };
 }
 
 // POST /recipes
 export async function postRecipe(recipe) {
-    // Gets the saved JWT token
-    const token = getToken();
+    const csrfToken = getCsrfToken();
 
     const response = await fetch(
         `${API_URL}/recipes`,
         {
             method: "POST",
+            credentials: "include",
 
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+                "X-XSRF-TOKEN": csrfToken,
             },
 
             body: JSON.stringify(recipe),
         }
     );
 
-    if (!response.ok) {
-        if (response.status === 401) {
-            throw new Error(
-                "Your login has expired. Please login again."
-            );
-        }
+    if (response.status === 401) {
+        return {
+            success: false,
+            unauthorized: true,
+            error: "Please login first",
+        };
+    }
 
+    if (response.status === 403) {
+        return {
+            success: false,
+            unauthorized: false,
+            error: "CSRF token is missing or invalid",
+        };
+    }
+
+    if (!response.ok) {
         const errorText =
             await response.text();
 
-        throw new Error(
-            errorText ||
-            "Failed to create recipe"
-        );
+        return {
+            success: false,
+            unauthorized: false,
+            error:
+                errorText ||
+                "Failed to create recipe",
+        };
     }
 
-    return response.json();
+    return {
+        success: true,
+        data: await response.json(),
+    };
+
 }
 
 // DELETE /recipes/{id}
 export async function removeRecipe(id) {
-    // Gets the saved JWT token
-    const token = getToken();
-
+    const csrfToken = getCsrfToken();
 
     const response = await fetch(
         `${API_URL}/recipes/${id}`,
         {
             method: "DELETE",
+            credentials: "include",
 
             headers: {
-                Authorization: `Bearer ${token}`,
+                "X-XSRF-TOKEN": csrfToken,
             },
         }
     );
 
     if (!response.ok) {
-        if (response.status === 401) {
-            throw new Error(
-                "Your login has expired. Please login again."
-            );
-        }
-
-        throw new Error(
-            "Failed to delete recipe"
-        );
+        return {
+            success: false,
+            error: "Failed to delete recipe",
+        };
     }
+
+    return {
+        success: true,
+    };
 }

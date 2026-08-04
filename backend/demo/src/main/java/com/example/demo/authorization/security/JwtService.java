@@ -1,6 +1,6 @@
-package com.example.demo.recipe.security;
+package com.example.demo.authorization.security;
 
-import com.example.demo.recipe.model.User;
+import com.example.demo.authorization.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -11,6 +11,11 @@ import io.jsonwebtoken.JwtException;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+
+//JwtService handles JWT tokens. It creates a token with the username, user ID, creation time, and expiration time
+// after login and signs it with a secret key for security
+// JwtAuthenticationFilter then checks this signature and expiration
+// on each request to log the user in
 
 @Service
 public class JwtService {
@@ -43,11 +48,11 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(user.getUsername())
-                .claim("userId", user.getId())
-                .issuedAt(issuedAt)
-                .expiration(expiration)
-                .signWith(getSigningKey())
-                .compact();
+                .claim("userId", user.getId()) // adds the user id to the token
+                .issuedAt(issuedAt)    // sets the time when the token was issued
+                .expiration(expiration) // sets the time when the token will expire
+                .signWith(getSigningKey()) // signs the token with the secret
+                .compact(); // gets the representation line of the token
     }
 
     // gets the username from the token

@@ -2,6 +2,7 @@ package com.example.demo.recipe.model;
 
 // описывает рецепт, соотвествует таблице в базе данных,
 // спринг бут и jta используют этот класс для соханения и получения рецептов из базы данных
+import com.example.demo.authorization.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

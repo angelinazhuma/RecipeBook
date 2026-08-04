@@ -11,27 +11,32 @@ import {
 
 // get all recipes from the backend
 export async function getAllRecipes() {
+    const result = await fetchAllRecipes();
 
-    // send a GET request and wait for the response
-    const recipes = await fetchAllRecipes();
+    if (!result.success) {
+        return result;
+    }
 
-    // transform the received data before returning it
-    return transformRecipes(recipes);
+    return {
+        success: true,
+        data: transformRecipes(result.data),
+    };
 }
 
 // create a new recipe
 export async function addNewRecipe(recipeDto) {
+    const result = await postRecipe(recipeDto);
 
-    // send a POST request with the recipe data
-    const createdRecipe = await postRecipe(recipeDto);
+    if (!result.success) {
+        return result;
+    }
 
-    // transform the created recipe before returning it
-    return transformRecipe(createdRecipe);
+    return {
+        success: true,
+        data: transformRecipe(result.data),
+    };
 }
 
-// delete a recipe by its ID
 export async function deleteRecipe(id) {
-
-    // send a DELETE request to the backend
-    await removeRecipe(id);
+    return removeRecipe(id);
 }
