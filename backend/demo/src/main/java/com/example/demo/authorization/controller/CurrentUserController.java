@@ -1,30 +1,18 @@
 package com.example.demo.authorization.controller;
 
-import com.example.demo.authorization.model.User;
-import com.example.demo.authorization.service.CurrentUserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import com.example.demo.authorization.security.AuthenticatedUser;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
-@RequestMapping("/auth/me")
-@RequiredArgsConstructor
+@RequestMapping("/auth")
 public class CurrentUserController {
 
-  private final CurrentUserService currentUserService;
-
-  @GetMapping
-  public ResponseEntity<Map<String, Object>> getCurrentUser() {
-    User user = currentUserService.getCurrentUser();
-
-    return ResponseEntity.ok(
-        Map.of(
-            "id", user.getId(),
-            "username", user.getUsername(),
-            "email", user.getEmail()
-        )
-    );
+  @GetMapping("/me")
+  public AuthenticatedUser getCurrentUser(
+      Authentication authentication
+  ) {
+    return (AuthenticatedUser)
+        authentication.getPrincipal();
   }
 }

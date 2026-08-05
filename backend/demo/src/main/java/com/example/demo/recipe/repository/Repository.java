@@ -17,7 +17,7 @@ public interface Repository
   List<Recipe> findAllByUserId(Long userId);
 
   Optional<Recipe> findByIdAndUserId(
-      Long recipeId,
+      Long Id,
       Long userId
   );
 }

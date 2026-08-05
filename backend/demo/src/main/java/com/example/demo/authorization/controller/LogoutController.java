@@ -1,5 +1,7 @@
 package com.example.demo.authorization.controller;
 
+import com.example.demo.authorization.utils.CookieUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -9,18 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth/logout")
+@RequiredArgsConstructor
 public class LogoutController {
+
+  private final CookieUtils cookieUtils;
 
   @PostMapping
   public ResponseEntity<Void> logout() {
-    ResponseCookie deletedCookie = ResponseCookie
-        .from("jwt", "") // empty value, deletes the cookie
-        .httpOnly(true) // prevents client-side JavaScript from accessing the cookie
-        .secure(false)
-        .sameSite("Lax") // stops cookies from being sent to third-party sites
-        .path("/") // restricts the cookie to the root path
-        .maxAge(0) // tells browser to delete cookie
-        .build(); // creates the cookie
+    ResponseCookie deletedCookie = cookieUtils.deleteJwtCookie();
 
     return ResponseEntity.noContent()
         .header(

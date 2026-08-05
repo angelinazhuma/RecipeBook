@@ -7,8 +7,6 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import io.jsonwebtoken.JwtException;
-
 import javax.crypto.SecretKey;
 import java.util.Date;
 
@@ -66,7 +64,7 @@ public class JwtService {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(token) //Parses the jws argument, expected to be a cryptographically-signed Claims JWS
                 .getPayload();
     }
 
@@ -78,9 +76,10 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes); // jwt library uses HMAC SHA-256
     }
 
-    public long exctractUserId(String token) {
-        Number userId = extractAllClaims(token)
-                .get("userId", Number.class);
+    public long extractUserId(String token) {
+        Number userId = extractAllClaims(token) // useful andmed
+                .get("userId", Number.class); // gets the user id from the token
+        // number.class is a parent class of long, because json parser returns a number
 
         return userId.longValue();
     }

@@ -1,7 +1,5 @@
 package com.example.demo.authorization.security;
 
-import com.example.demo.authorization.model.User;
-import com.example.demo.authorization.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -32,6 +29,8 @@ public class JwtAuthenticationFilter
 
   @Override
   protected void doFilterInternal(
+
+
       HttpServletRequest request, // HAS URL, HTTP METHOD, HEADERS, COOKIES, BODY
       HttpServletResponse response, //response that backends sends to the browser
       FilterChain filterChain // chain of filters that are executed after this filter
@@ -39,6 +38,8 @@ public class JwtAuthenticationFilter
 
     // 1. gets JWT token from the cookie
     String token = extractTokenFromCookies(request);
+
+
 
     // continues without authentication if there is no JWT cookie
     if (token == null || token.isBlank()) {
@@ -51,7 +52,7 @@ public class JwtAuthenticationFilter
       String username =
           jwtService.extractUsername(token);
 
-      Long userId = jwtService.exctractUserId(token);
+      Long userId = jwtService.extractUserId(token);
 
       boolean authenticationMissing =
           SecurityContextHolder.getContext().getAuthentication() == null;
@@ -71,7 +72,7 @@ public class JwtAuthenticationFilter
         // checks if the JWT token is valid for the user
           UsernamePasswordAuthenticationToken authentication =
               new UsernamePasswordAuthenticationToken(
-                  username,
+                  authenticatedUser,
                   null,
                   List.of()
               );

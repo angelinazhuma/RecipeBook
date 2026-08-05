@@ -1,6 +1,5 @@
 package com.example.demo.recipe.service;
 
-import com.example.demo.authorization.service.CurrentUserService;
 import com.example.demo.recipe.DTO.IngredientDTO;
 import com.example.demo.recipe.DTO.RecipeRequestDTO;
 import com.example.demo.recipe.DTO.RecipeResponseDTO;
@@ -8,6 +7,8 @@ import com.example.demo.recipe.model.Ingredient;
 import com.example.demo.recipe.model.Recipe;
 import com.example.demo.authorization.model.User;
 import com.example.demo.recipe.repository.Repository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -19,59 +20,69 @@ public class Service {
   @Autowired
   private Repository repository;
 
-  @Autowired
-  private CurrentUserService currentUserService;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   // get all recipes of current user
-  public List<RecipeResponseDTO> getAllRecipes() {
-
-    User currentUser = currentUserService.getCurrentUser();
-
-
-    List<Recipe> recipes =
-        repository.findAllByUserId(currentUser.getId());
-
-    return recipes.stream()
+  public List<RecipeResponseDTO> getAllRecipes(
+      Long userId
+  ) {
+    return repository
+        .findAllByUserId(userId)
+        .stream()
         .map(this::toResponseDTO)
         .toList();
   }
 
   // get one recipe of current user by id
-  public Optional<RecipeResponseDTO> getRecipeById(Long id) {
-    User currentUser = currentUserService.getCurrentUser();
-
+  public Optional<RecipeResponseDTO> getRecipeById(
+      Long recipeId,
+      Long userId
+  ) {
     return repository
         .findByIdAndUserId(
-            id,
-            currentUser.getId()
+            recipeId,
+            userId
         )
         .map(this::toResponseDTO);
   }
 
   // save new recipe for current user
-  public RecipeResponseDTO saveRecipe(RecipeRequestDTO dto) {
-    User currentUser = currentUserService.getCurrentUser();
-
+  public RecipeResponseDTO saveRecipe(
+      RecipeRequestDTO dto,
+      Long userId
+  ) {
     Recipe recipe = toEntity(dto);
 
-    recipe.setUser(currentUser);
+    User userReference =
+        entityManager.getReference(
+            User.class,
+            userId
+        );
 
-    Recipe savedRecipe = repository.save(recipe);
+    recipe.setUser(userReference);
+
+    Recipe savedRecipe =
+        repository.save(recipe);
 
     return toResponseDTO(savedRecipe);
   }
 
   // delete only current user's recipe
-  public void deleteRecipe(Long id) {
-    User currentUser = currentUserService.getCurrentUser();
-
+  public void deleteRecipe(
+      Long recipeId,
+      Long userId
+  ) {
     Recipe recipe = repository
         .findByIdAndUserId(
-            id,
-            currentUser.getId()
+            recipeId,
+            userId
         )
         .orElseThrow(() ->
-            new RuntimeException("Recipe not found")
+            new RuntimeException(
+                "Recipe not found"
+            )
         );
 
     repository.delete(recipe);
