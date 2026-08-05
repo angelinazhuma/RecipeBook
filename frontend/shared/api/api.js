@@ -30,7 +30,6 @@ export async function postRecipe(recipe) {
 
             headers: {
                 "Content-Type": "application/json",
-                "X-XSRF-TOKEN": csrfToken,
             },
 
             body: JSON.stringify(recipe),
@@ -82,10 +81,7 @@ export async function removeRecipe(id) {
         {
             method: "DELETE",
             credentials: "include",
-
-            headers: {
-                "X-XSRF-TOKEN": csrfToken,
-            },
+            
         }
     );
 

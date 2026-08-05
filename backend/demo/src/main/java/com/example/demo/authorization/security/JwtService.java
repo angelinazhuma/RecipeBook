@@ -47,7 +47,7 @@ public class JwtService {
         );
 
         return Jwts.builder()
-                .subject(user.getUsername())
+                .subject(user.getUsername()) // writes the username to the token
                 .claim("userId", user.getId()) // adds the user id to the token
                 .issuedAt(issuedAt)    // sets the time when the token was issued
                 .expiration(expiration) // sets the time when the token will expire
@@ -73,25 +73,16 @@ public class JwtService {
     // converts the Base64 secret into a signing key
     private SecretKey getSigningKey() {
         byte[] keyBytes =
-                Decoders.BASE64.decode(jwtSecret);
+                Decoders.BASE64.decode(jwtSecret); // converts the secret into bytes
 
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(keyBytes); // jwt library uses HMAC SHA-256
     }
 
-    // checks whether the token belongs to the user
-    public boolean isTokenValid(
-            String token,
-            User user
-    ) {
-        try {
-            String username = extractUsername(token);
+    public long exctractUserId(String token) {
+        Number userId = extractAllClaims(token)
+                .get("userId", Number.class);
 
-            return username.equals(user.getUsername());
-        } catch (
-                JwtException
-                | IllegalArgumentException exceptionS
-        ) {
-            return false;
-        }
+        return userId.longValue();
     }
+
 }

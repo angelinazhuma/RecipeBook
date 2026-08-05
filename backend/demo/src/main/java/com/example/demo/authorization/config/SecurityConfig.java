@@ -41,14 +41,14 @@ public class SecurityConfig {
             cors.configurationSource(
                 corsConfigurationSource()
             )
-        )
+        ) // enables CORS for all routes
 
-        .csrf(csrf -> csrf.disable())
+        .csrf(csrf -> csrf.disable()) //xsrf token
 
 
         .sessionManagement(session ->
             session.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS
+                SessionCreationPolicy.STATELESS // withous state (jwt)
             )
         ) // disables session management
 
@@ -121,5 +121,7 @@ public class SecurityConfig {
     ); // applies CORS configuration to all routes
 
     return source;
+
+
   }
 }

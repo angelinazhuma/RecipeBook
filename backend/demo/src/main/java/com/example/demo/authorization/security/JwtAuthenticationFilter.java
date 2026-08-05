@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -29,22 +30,19 @@ public class JwtAuthenticationFilter
   // service for reading and validating JWT tokens, knows how to make token, read token and check it
   private final JwtService jwtService;
 
-  // repository for finding users
-  private final UserRepository userRepository;
-
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      FilterChain filterChain
+      HttpServletRequest request, // HAS URL, HTTP METHOD, HEADERS, COOKIES, BODY
+      HttpServletResponse response, //response that backends sends to the browser
+      FilterChain filterChain // chain of filters that are executed after this filter
   ) throws ServletException, IOException {
 
-    // gets JWT token from the cookie
+    // 1. gets JWT token from the cookie
     String token = extractTokenFromCookies(request);
 
     // continues without authentication if there is no JWT cookie
     if (token == null || token.isBlank()) {
-      filterChain.doFilter(request, response);
+      filterChain.doFilter(request, response); // this filter stopped its job, send request and response to tne next object
       return;
     }
 
@@ -53,48 +51,40 @@ public class JwtAuthenticationFilter
       String username =
           jwtService.extractUsername(token);
 
-      // checks that the user is not already authenticated
-      boolean authenticationMissing =
-          SecurityContextHolder
-              .getContext()
-              .getAuthentication() == null;
+      Long userId = jwtService.exctractUserId(token);
 
-      if (
+      boolean authenticationMissing =
+          SecurityContextHolder.getContext().getAuthentication() == null;
+
+      if ( //
           username != null
+              && userId != null
               && authenticationMissing
       ) {
-        // finds the user in the database
-        User user = userRepository
-            .findByUsername(username)
-            .orElse(null);
 
-        // checks that the user exists
-        // and the JWT token is valid
-        if (
-            user != null
-                && jwtService.isTokenValid(
-                token,
-                user
-            )
-        ) {
-          // creates an authenticated Spring Security object
+        AuthenticatedUser authenticatedUser =
+            new AuthenticatedUser(
+                userId,
+                username
+            );
+
+        // checks if the JWT token is valid for the user
           UsernamePasswordAuthenticationToken authentication =
               new UsernamePasswordAuthenticationToken(
-                  user.getUsername(),
+                  username,
                   null,
                   List.of()
               );
 
           authentication.setDetails(
               new WebAuthenticationDetailsSource()
-                  .buildDetails(request)
+                  .buildDetails(request) // sets the details of the authentication
           );
 
           // saves authentication for the current request
           SecurityContextHolder
               .getContext()
               .setAuthentication(authentication);
-        }
       }
     } catch (
         JwtException
@@ -103,9 +93,10 @@ public class JwtAuthenticationFilter
       // clears authentication if JWT is invalid or expired
       SecurityContextHolder.clearContext();
     }
-
-    // continues processing the request
-    filterChain.doFilter(request, response);
+    filterChain.doFilter(
+        request,
+        response
+    );
   }
 
   // searches for the JWT cookie in the request
