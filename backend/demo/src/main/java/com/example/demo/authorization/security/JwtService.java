@@ -64,7 +64,7 @@ public class JwtService {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
-                .parseSignedClaims(token) //Parses the jws argument, expected to be a cryptographically-signed Claims JWS
+                .parseSignedClaims(token) //Parses the jws argument, expected to be a cryptographically signed Claims JWS
                 .getPayload();
     }
 
@@ -77,7 +77,7 @@ public class JwtService {
     }
 
     public long extractUserId(String token) {
-        Number userId = extractAllClaims(token) // useful andmed
+        Number userId = extractAllClaims(token) // useful data/information/details
                 .get("userId", Number.class); // gets the user id from the token
         // number.class is a parent class of long, because json parser returns a number
 
