@@ -6,7 +6,7 @@ import com.example.demo.recipe.DTO.RecipeResponseDTO;
 import com.example.demo.recipe.model.Ingredient;
 import com.example.demo.recipe.model.Recipe;
 import com.example.demo.authorization.model.User;
-import com.example.demo.recipe.repository.Repository;
+import com.example.demo.recipe.repository.RecipeRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +15,10 @@ import java.util.List;
 import java.util.Optional;
 
 @org.springframework.stereotype.Service
-public class Service {
+public class RecipeService {
 
   @Autowired
-  private Repository repository;
-
+  private RecipeRepository repository;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -90,38 +89,19 @@ public class Service {
 
   // RecipeRequestDTO to Recipe
   private Recipe toEntity(RecipeRequestDTO dto) {
-    Recipe recipe = new Recipe();
-
-    recipe.setName(dto.getName());
-    recipe.setAuthor(dto.getAuthor());
-    recipe.setRecipeDescription(
-        dto.getRecipeDescription()
-    );
-
-    List<Ingredient> ingredients = dto.getIngredients()
-        .stream()
-        .map(ingredientDTO -> {
-          Ingredient ingredient = new Ingredient();
-
-          ingredient.setName(
-              ingredientDTO.getName()
-          );
-          ingredient.setAmount(
-              ingredientDTO.getAmount()
-          );
-          ingredient.setUnit(
-              ingredientDTO.getUnit()
-          );
-
-          ingredient.setRecipe(recipe);
-
-          return ingredient;
-        })
-        .toList();
-
-    recipe.setIngredients(ingredients);
-
-    return recipe;
+    return Recipe.builder()
+        .name(dto.getName())
+        .author(dto.getAuthor())
+        .recipeDescription(dto.getRecipeDescription())
+        .ingredients(
+            dto.getIngredients().stream().map(ingredientDTO ->
+                Ingredient.builder()
+                    .unit(ingredientDTO.getUnit())
+                    .amount(ingredientDTO.getAmount())
+                    .name(ingredientDTO.getName())
+                    .build()
+            ).toList()
+        ).build();
   }
 
   // Recipe to RecipeResponseDTO

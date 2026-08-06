@@ -20,7 +20,6 @@ export async function fetchAllRecipes() {
 
 // POST /recipes
 export async function postRecipe(recipe) {
-    const csrfToken = getCsrfToken();
 
     const response = await fetch(
         `${API_URL}/recipes`,
@@ -41,14 +40,6 @@ export async function postRecipe(recipe) {
             success: false,
             unauthorized: true,
             error: "Please login first",
-        };
-    }
-
-    if (response.status === 403) {
-        return {
-            success: false,
-            unauthorized: false,
-            error: "CSRF token is missing or invalid",
         };
     }
 
@@ -74,8 +65,6 @@ export async function postRecipe(recipe) {
 
 // DELETE /recipes/{id}
 export async function removeRecipe(id) {
-    const csrfToken = getCsrfToken();
-
     const response = await fetch(
         `${API_URL}/recipes/${id}`,
         {

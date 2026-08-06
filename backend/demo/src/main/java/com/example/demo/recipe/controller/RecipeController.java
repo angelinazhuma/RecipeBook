@@ -1,7 +1,7 @@
 package com.example.demo.recipe.controller;
 
 import com.example.demo.authorization.security.AuthenticatedUser;
-import com.example.demo.recipe.service.Service;
+import com.example.demo.recipe.service.RecipeService;
 import com.example.demo.recipe.DTO.RecipeRequestDTO;
 import com.example.demo.recipe.DTO.RecipeResponseDTO;
 import jakarta.validation.Valid;
@@ -15,15 +15,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/recipes")
-@CrossOrigin(origins = {
-        "http://localhost:3000",
-        "http://172.17.222.129:3000"
-})
-public class Controller {
+public class RecipeController {
 
-    public final Service service;
+    public final RecipeService service;
 
-  public Controller(Service service) {
+  public RecipeController(RecipeService service) {
     this.service = service;
   }
 

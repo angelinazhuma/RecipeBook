@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-role
+      author: angelina
+
+      changes:
+        - addColumn:
+            tableName: app_users
+            columns:
+              - column:
+                  name: role
+                  type: VARCHAR(20)
+                  defaultValue: USER
+                  constraints:
+                    nullable: false

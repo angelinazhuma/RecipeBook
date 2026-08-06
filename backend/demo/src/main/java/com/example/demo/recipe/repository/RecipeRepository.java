@@ -11,7 +11,7 @@ import java.util.Optional;
 
 
 @org.springframework.stereotype.Repository // this tells spring that this class works with db
-public interface Repository
+public interface RecipeRepository
     extends JpaRepository<Recipe, Long> {
 
   List<Recipe> findAllByUserId(Long userId);

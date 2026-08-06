@@ -2,6 +2,7 @@ package com.example.demo.authorization.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -28,24 +29,11 @@ public class User {
   @Column(name = "password_hash", nullable = false)
   private String passwordHash;
 
+  @CreationTimestamp
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 
-
-  public User(String username, String email, String passwordHash) {
-    this.username = username;
-    this.email = email;
-    this.passwordHash = passwordHash;
-  }
-
-  @PrePersist
-  public void prePersist() {
-    if (createdAt == null) {
-      createdAt = LocalDateTime.now();
-    }
-  }
-
-
-
-
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Role role;
 }

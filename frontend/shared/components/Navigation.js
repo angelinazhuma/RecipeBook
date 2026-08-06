@@ -22,6 +22,9 @@ export default function Navigation() {
     const router = useRouter();
     const pathname = usePathname();
 
+    const [currentUser, setCurrentUser] =
+        useState(null);
+
     const [isLoggedIn, setIsLoggedIn] =
         useState(false);
 
@@ -38,13 +41,15 @@ export default function Navigation() {
             const result =
                 await getCurrentUser();
 
-            if (cancelled) {
-                return;
-            }
-
             setIsLoggedIn(
                 result.authenticated
             );
+
+            if (result.authenticated) {
+                setCurrentUser(result.user);
+            } else {
+                setCurrentUser(null);
+            }
 
             setIsCheckingAuth(false);
         }
@@ -74,6 +79,7 @@ export default function Navigation() {
     }
 
     return (
+
         <nav className="navigation">
             {isLoggedIn ? (
                 <>
@@ -104,6 +110,14 @@ export default function Navigation() {
                     </Link>
                 </>
             )}
+
+            {currentUser?.role === "ADMIN" && (
+                <Link href="/admin">
+                    Admin
+                </Link>
+            )}
+
+
         </nav>
     );
 }

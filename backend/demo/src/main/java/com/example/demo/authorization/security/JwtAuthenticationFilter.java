@@ -7,7 +7,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -30,16 +32,13 @@ public class JwtAuthenticationFilter
   @Override
   protected void doFilterInternal(
 
-
-      HttpServletRequest request, // HAS URL, HTTP METHOD, HEADERS, COOKIES, BODY
-      HttpServletResponse response, //response that backends sends to the browser
-      FilterChain filterChain // chain of filters that are executed after this filter
+      @NonNull HttpServletRequest request, // HAS URL, HTTP METHOD, HEADERS, COOKIES, BODY
+      @NonNull HttpServletResponse response, //response that backends sends to the browser
+      @NonNull FilterChain filterChain // chain of filters that are executed after this filter
   ) throws ServletException, IOException {
 
     // 1. gets JWT token from the cookie
     String token = extractTokenFromCookies(request);
-
-
 
     // continues without authentication if there is no JWT cookie
     if (token == null || token.isBlank()) {
@@ -54,6 +53,8 @@ public class JwtAuthenticationFilter
 
       Long userId = jwtService.extractUserId(token);
 
+      String role = jwtService.extractRole(token);
+
       boolean authenticationMissing =
           SecurityContextHolder.getContext().getAuthentication() == null;
 
@@ -66,7 +67,8 @@ public class JwtAuthenticationFilter
         AuthenticatedUser authenticatedUser =
             new AuthenticatedUser(
                 userId,
-                username
+                username,
+                role
             );
 
         // checks if the JWT token is valid for the user
@@ -74,7 +76,9 @@ public class JwtAuthenticationFilter
               new UsernamePasswordAuthenticationToken(
                   authenticatedUser,
                   null,
-                  List.of()
+                  List.of(
+                      new SimpleGrantedAuthority("ROLE_" + role)
+                  )
               );
 
           authentication.setDetails(

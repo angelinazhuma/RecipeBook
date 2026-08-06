@@ -38,7 +38,6 @@ public class UserService {
     //then makes entity
     return userRepository.save(user);
 
-
   }
 
   public User login(LoginRequestDTO request) {

@@ -65,7 +65,10 @@ public class SecurityConfig {
 
             .requestMatchers(
                 "/auth/me", "/recipes/**"
-            ).authenticated() // requires authentication for all recipes routes
+            ).authenticated()// requires authentication for all recipes routes
+
+            .requestMatchers("/admin/**")
+            .hasRole("ADMIN")
 
             .anyRequest().authenticated()
         )

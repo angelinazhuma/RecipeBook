@@ -47,10 +47,16 @@ public class JwtService {
         return Jwts.builder()
                 .subject(user.getUsername()) // writes the username to the token
                 .claim("userId", user.getId()) // adds the user id to the token
+                .claim("role", user.getRole().name())
                 .issuedAt(issuedAt)    // sets the time when the token was issued
                 .expiration(expiration) // sets the time when the token will expire
                 .signWith(getSigningKey()) // signs the token with the secret
                 .compact(); // gets the representation line of the token
+    }
+
+    public String extractRole(String token) {
+        return extractAllClaims(token)
+            .get("role", String.class);
     }
 
     // gets the username from the token

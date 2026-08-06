@@ -2,8 +2,8 @@ package com.example.demo;
 
 import com.example.demo.recipe.model.Ingredient;
 import com.example.demo.recipe.model.Recipe;
-import com.example.demo.recipe.repository.Repository;
-import com.example.demo.recipe.service.Service;
+import com.example.demo.recipe.repository.RecipeRepository;
+import com.example.demo.recipe.service.RecipeService;
 import com.example.demo.recipe.DTO.IngredientDTO;
 import com.example.demo.recipe.DTO.RecipeRequestDTO;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,15 +14,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-class RecipeServiceTest {
+class RecipeRecipeServiceTest {
 
     //fake repository created by mockito
     @Mock
-    private Repository repository;
+    private RecipeRepository repository;
 
 
     @InjectMocks
-    private Service service;
+    private RecipeService service;
 
     private Recipe createRecipe(
             Long id,

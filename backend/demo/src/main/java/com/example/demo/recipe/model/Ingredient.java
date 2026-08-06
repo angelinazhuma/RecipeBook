@@ -5,13 +5,15 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "ingredients")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ingredient {
 
     @Id
@@ -32,14 +34,4 @@ public class Ingredient {
     @JoinColumn(name = "recipe_id")
     @JsonIgnore
     private Recipe recipe;
-
-    public Ingredient() {
-    }
-
-    public Ingredient(String name, Double amount, String unit) {
-        this.name = name;
-        this.amount = amount;
-        this.unit = unit;
-    }
-
 }

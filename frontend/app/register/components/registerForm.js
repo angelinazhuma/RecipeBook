@@ -23,6 +23,23 @@ export default function RegisterForm() {
     const [loading, setLoading] =
         useState(false);
 
+    const [passwordStrength, setPasswordStrength] =
+        useState(0);
+
+    const hasLength = password.length >= 8;
+
+    const hasUppercase =
+        /[A-Z]/.test(password);
+
+    const hasLowercase =
+        /[a-z]/.test(password);
+
+    const hasNumber =
+        /\d/.test(password);
+
+    const hasSpecial =
+        /[^A-Za-z0-9]/.test(password);
+
     async function handleSubmit(event) {
         event.preventDefault();
 
@@ -45,6 +62,31 @@ export default function RegisterForm() {
         } finally {
             setLoading(false);
         }
+    }
+
+    function handlePasswordChange(event) {
+        const value = event.target.value;
+
+        setPassword(value);
+
+        let point = 0;
+
+        if (value.length >= 8) {
+            const tests = [
+                /[0-9]/,
+                /[a-z]/,
+                /[A-Z]/,
+                /[^0-9a-zA-Z]/,
+            ];
+
+            tests.forEach((test) => {
+                if (test.test(value)) {
+                    point++;
+                }
+            });
+        }
+
+        setPasswordStrength(point);
     }
 
     return (
@@ -95,19 +137,68 @@ export default function RegisterForm() {
                         type="password"
                         placeholder="Password"
                         value={password}
-                        onChange={(event) =>
-                            setPassword(
-                                event.target.value
-                            )
-                        }
+                        onChange={handlePasswordChange}
                         minLength={8}
                         required
                     />
 
-                    <small className="password-hint">
-                        Password must contain at
-                        least 8 characters.
-                    </small>
+                    <span className="password-strength-label">
+        Strength of password
+    </span>
+
+                    <div className="power-container">
+                        <div
+                            className="power-point"
+                            style={{
+                                width: [
+                                    "1%",
+                                    "25%",
+                                    "50%",
+                                    "75%",
+                                    "100%",
+                                ][passwordStrength],
+
+                                backgroundColor: [
+                                    "#D73F40",
+                                    "#DC6551",
+                                    "#F2B84F",
+                                    "#BDE952",
+                                    "#3ba62f",
+                                ][passwordStrength],
+                            }}
+                        />
+                    </div>
+
+                    <div className="password-rules">
+
+                        <p>
+                            {hasLength ? "✅" : "❌"} At least
+                            8 characters
+                        </p>
+
+                        <p>
+                            {hasUppercase ? "✅" : "❌"} One
+                            uppercase letter
+                        </p>
+
+                        <p>
+                            {hasLowercase ? "✅" : "❌"} One
+                            lowercase letter
+                        </p>
+
+                        <p>
+                            {hasNumber ? "✅" : "❌"} One
+                            number
+                        </p>
+
+                        <p>
+                            {hasSpecial ? "✅" : "❌"} One
+                            special character
+                        </p>
+
+                    </div>
+
+
                 </label>
 
                 {error && (
