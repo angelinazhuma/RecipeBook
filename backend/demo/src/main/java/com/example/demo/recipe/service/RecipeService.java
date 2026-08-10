@@ -1,27 +1,27 @@
 package com.example.demo.recipe.service;
 
-import com.example.demo.recipe.DTO.IngredientDTO;
+import com.example.demo.authorization.repository.UserRepository;
 import com.example.demo.recipe.DTO.RecipeRequestDTO;
 import com.example.demo.recipe.DTO.RecipeResponseDTO;
-import com.example.demo.recipe.model.Ingredient;
 import com.example.demo.recipe.model.Recipe;
 import com.example.demo.authorization.model.User;
 import com.example.demo.recipe.repository.RecipeRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.recipe.utils.RecipeMapper;
 import java.util.List;
-import java.util.Optional;
+
+import static com.example.demo.recipe.utils.RecipeMapper.toEntity;
+import static com.example.demo.recipe.utils.RecipeMapper.toResponseDTO;
 
 @org.springframework.stereotype.Service
 public class RecipeService {
 
   @Autowired
   private RecipeRepository repository;
+  @Autowired
+  private UserRepository userRepository;
 
-  @PersistenceContext
-  private EntityManager entityManager;
 
   // get all recipes of current user
   public List<RecipeResponseDTO> getAllRecipes(
@@ -30,21 +30,27 @@ public class RecipeService {
     return repository
         .findAllByUserId(userId)
         .stream()
-        .map(this::toResponseDTO)
+        .map(RecipeMapper::toResponseDTO)
         .toList();
   }
 
   // get one recipe of current user by id
-  public Optional<RecipeResponseDTO> getRecipeById(
+  public RecipeResponseDTO getRecipeById(
       Long recipeId,
       Long userId
   ) {
-    return repository
+    Recipe recipe = repository
         .findByIdAndUserId(
             recipeId,
             userId
         )
-        .map(this::toResponseDTO);
+        .orElseThrow(() ->
+            new RuntimeException(
+                "Recipe not found"
+            )
+        );
+
+    return toResponseDTO(recipe);
   }
 
   // save new recipe for current user
@@ -54,13 +60,15 @@ public class RecipeService {
   ) {
     Recipe recipe = toEntity(dto);
 
-    User userReference =
-        entityManager.getReference(
-            User.class,
-            userId
-        );
+    User user =
+        userRepository.getReferenceById(userId);
 
-    recipe.setUser(userReference);
+    recipe.setUser(user);
+
+    recipe.getIngredients().forEach(
+        ingredient ->
+            ingredient.setRecipe(recipe)
+    );
 
     Recipe savedRecipe =
         repository.save(recipe);
@@ -87,61 +95,4 @@ public class RecipeService {
     repository.delete(recipe);
   }
 
-  // RecipeRequestDTO to Recipe
-  private Recipe toEntity(RecipeRequestDTO dto) {
-    return Recipe.builder()
-        .name(dto.getName())
-        .author(dto.getAuthor())
-        .recipeDescription(dto.getRecipeDescription())
-        .ingredients(
-            dto.getIngredients().stream().map(ingredientDTO ->
-                Ingredient.builder()
-                    .unit(ingredientDTO.getUnit())
-                    .amount(ingredientDTO.getAmount())
-                    .name(ingredientDTO.getName())
-                    .build()
-            ).toList()
-        ).build();
-  }
-
-  // Recipe to RecipeResponseDTO
-  private RecipeResponseDTO toResponseDTO(
-      Recipe recipe
-  ) {
-    RecipeResponseDTO dto =
-        new RecipeResponseDTO();
-
-    dto.setId(recipe.getId());
-    dto.setName(recipe.getName());
-    dto.setAuthor(recipe.getAuthor());
-    dto.setRecipeDescription(
-        recipe.getRecipeDescription()
-    );
-    dto.setCreatedAt(recipe.getCreatedAt());
-
-    List<IngredientDTO> ingredients =
-        recipe.getIngredients()
-            .stream()
-            .map(ingredient -> {
-              IngredientDTO ingredientDTO =
-                  new IngredientDTO();
-
-              ingredientDTO.setName(
-                  ingredient.getName()
-              );
-              ingredientDTO.setAmount(
-                  ingredient.getAmount()
-              );
-              ingredientDTO.setUnit(
-                  ingredient.getUnit()
-              );
-
-              return ingredientDTO;
-            })
-            .toList();
-
-    dto.setIngredients(ingredients);
-
-    return dto;
-  }
 }

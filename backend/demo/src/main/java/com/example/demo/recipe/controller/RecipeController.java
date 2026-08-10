@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 
 // controller gets http-requests and calls service methods
 
@@ -35,7 +34,7 @@ public class RecipeController {
   }
     // GET recipe by id
     @GetMapping("/{id}")
-    public Optional<RecipeResponseDTO> getRecipeById(
+    public RecipeResponseDTO getRecipeById(
         @PathVariable Long id,
         Authentication authentication
     ) {

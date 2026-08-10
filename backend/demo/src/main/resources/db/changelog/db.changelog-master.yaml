@@ -72,3 +72,5 @@ databaseChangeLog: # zdes nahodjtsa izmenenija bazi daniih
       file: db/changelog/2026-07-31-add-user-id-to-recipes.yaml
   - include:
       file: db/changelog/2026-08-06-add-role-to-users.yaml
+  - include:
+      file: db/changelog/2026-08-07-add-mfa-to-users.yaml

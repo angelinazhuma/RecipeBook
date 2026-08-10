@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -60,11 +59,23 @@ public class SecurityConfig {
 
             .requestMatchers(
                 "/auth/register",
-                "/auth/login", "/auth/logout"
+                "/auth/login",
+                "/auth/logout",
+                "/auth/mfa/verify-login"
             ).permitAll() // allows registration and login requests
 
             .requestMatchers(
-                "/auth/me", "/recipes/**"
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/v3/api-docs/**",
+                "/v3/api-docs.yaml"
+            ).permitAll()
+
+            .requestMatchers(
+                "/auth/me",
+                "/recipes/**",
+                "/auth/mfa/setup",
+                "/auth/mfa/enable"
             ).authenticated()// requires authentication for all recipes routes
 
             .requestMatchers("/admin/**")

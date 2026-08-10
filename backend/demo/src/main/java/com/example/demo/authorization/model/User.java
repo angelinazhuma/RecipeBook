@@ -36,4 +36,10 @@ public class User {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Role role;
+
+  @Column(name = "mfa_enabled", nullable = false)
+  private boolean mfaEnabled;
+
+  @Column(name = "mfa_secret")
+  private String mfaSecret;
 }

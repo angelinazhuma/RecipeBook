@@ -1,10 +1,9 @@
-package com.example.demo.recipe.controller;
+package com.example.demo.authorization.controller;
 
 import com.example.demo.authorization.model.User;
 import com.example.demo.authorization.repository.UserRepository;
 import com.example.demo.recipe.model.Recipe;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.Repository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

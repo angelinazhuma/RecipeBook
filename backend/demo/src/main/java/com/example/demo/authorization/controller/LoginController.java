@@ -1,7 +1,7 @@
 package com.example.demo.authorization.controller;
 
 import com.example.demo.authorization.DTO.LoginRequestDTO;
-import com.example.demo.authorization.DTO.LoginResponseDTO;
+import com.example.demo.authorization.DTO.LoginResultDTO;
 import com.example.demo.authorization.model.User;
 import com.example.demo.authorization.security.JwtService;
 import com.example.demo.authorization.service.UserService;
@@ -23,30 +23,42 @@ public class LoginController {
   private final CookieUtils cookieUtils;
 
   @PostMapping
-  public ResponseEntity<LoginResponseDTO> login(
-      @Valid @RequestBody LoginRequestDTO request // gets request
+  public ResponseEntity<LoginResultDTO> login(
+      @Valid @RequestBody LoginRequestDTO request
   ) {
 
     User user = userService.login(request);
 
-    String token = jwtService.generateToken(user);
+    if (user.isMfaEnabled()) {
 
-    ResponseCookie jwtCookie = cookieUtils.createJwtCookie (token);
+      String mfaToken =
+          jwtService.generateMfaToken(user);
 
+      return ResponseEntity.ok(
+          new LoginResultDTO(
+              true,
+              mfaToken,
+              "MFA required"
+          )
+      );
+    }
 
-    LoginResponseDTO response =
-        new LoginResponseDTO(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            "Login successful",
-            null
-        );
+    String token =
+        jwtService.generateToken(user);
+
+    ResponseCookie jwtCookie =
+        cookieUtils.createJwtCookie(token);
 
     return ResponseEntity.ok()
         .header(
-            HttpHeaders.SET_COOKIE, // sets the cookie in the response header
-            jwtCookie.toString() // converts the cookie to a string
+            HttpHeaders.SET_COOKIE,
+            jwtCookie.toString()
         )
-        .body(response); // returns the response
+        .body(
+            new LoginResultDTO(
+                false,
+                null,
+                "Login successful"
+            )
+        );
   }}

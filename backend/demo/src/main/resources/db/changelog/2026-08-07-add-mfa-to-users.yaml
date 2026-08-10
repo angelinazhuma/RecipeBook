@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-mfa-to-users
+      author: angelina
+      changes:
+        - addColumn:
+            tableName: app_users
+            columns:
+              - column:
+                  name: mfa_enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: mfa_secret
+                  type: VARCHAR(255)

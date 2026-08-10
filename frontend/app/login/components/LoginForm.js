@@ -26,21 +26,37 @@ export default function LoginForm() {
         setIsLoading(true);
 
         try {
-            await loginUser({
+            const result = await loginUser({
                 login,
                 password,
             });
 
+            if (!result.success) {
+                setError(result.error);
+                return;
+            }
+
+            if (result.data.mfaRequired) {
+
+                sessionStorage.setItem(
+                    "mfaToken",
+                    result.data.mfaToken
+                );
+
+                router.push("/mfa");
+                return;
+            }
+
             router.replace("/view");
             router.refresh();
+
         } catch (err) {
             setError(
                 err.message || "Login failed"
             );
         } finally {
             setIsLoading(false);
-        }
-    }
+        }}
 
     return (
         <>

@@ -90,4 +90,34 @@ public class JwtService {
         return userId.longValue();
     }
 
+    public String generateMfaToken(User user) {
+        Date issuedAt = new Date();
+
+        Date expiration = new Date(
+            issuedAt.getTime() + 5 * 60 * 1000
+        ); // time when the token will expire in 5 minutes
+
+        return Jwts.builder()
+            .subject(user.getUsername())
+            .claim("userId", user.getId())
+            .claim("mfaPending", true)
+            .issuedAt(issuedAt)
+            .expiration(expiration)
+            .signWith(getSigningKey())
+            .compact();
+    }
+
+// checks if the user has MFA enabled
+    public boolean isMfaPending(String token) {
+        Boolean mfaPending =
+            extractAllClaims(token)
+                .get("mfaPending", Boolean.class); //get intormation about the type og data like the object in other method
+
+        return Boolean.TRUE.equals(mfaPending);
+    }
+
+    //reads all data from the tokem
+    // takes mfapending and user id from the token
+    // returns true if the user has MFA enabled
+
 }

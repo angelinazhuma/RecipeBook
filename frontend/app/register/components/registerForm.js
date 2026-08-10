@@ -35,10 +35,17 @@ export default function RegisterForm() {
         /[a-z]/.test(password);
 
     const hasNumber =
-        /\d/.test(password);
+        /\d/.test(password); //digit
 
     const hasSpecial =
-        /[^A-Za-z0-9]/.test(password);
+        /[^A-Za-z0-9]/.test(password); // special character
+
+    const isPasswordValid =
+        hasLength &&
+        hasUppercase &&
+        hasLowercase &&
+        hasNumber &&
+        hasSpecial;
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -69,7 +76,7 @@ export default function RegisterForm() {
 
         setPassword(value);
 
-        let point = 0;
+        let point = 0; // number with 0, here will be result pf password strength
 
         if (value.length >= 8) {
             const tests = [
@@ -79,14 +86,14 @@ export default function RegisterForm() {
                 /[^0-9a-zA-Z]/,
             ];
 
-            tests.forEach((test) => {
+            tests.forEach((test) => { //goes through all tests
                 if (test.test(value)) {
-                    point++;
-                }
+                    point++; // point = point +1
+                } //
             });
         }
 
-        setPasswordStrength(point);
+        setPasswordStrength(point); // set point to password strength
     }
 
     return (
@@ -149,23 +156,7 @@ export default function RegisterForm() {
                     <div className="power-container">
                         <div
                             className="power-point"
-                            style={{
-                                width: [
-                                    "1%",
-                                    "25%",
-                                    "50%",
-                                    "75%",
-                                    "100%",
-                                ][passwordStrength],
-
-                                backgroundColor: [
-                                    "#D73F40",
-                                    "#DC6551",
-                                    "#F2B84F",
-                                    "#BDE952",
-                                    "#3ba62f",
-                                ][passwordStrength],
-                            }}
+                            style={{ '--strength': passwordStrength }}
                         />
                     </div>
 
@@ -212,12 +203,13 @@ export default function RegisterForm() {
 
                 <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !isPasswordValid}
                 >
                     {loading
                         ? "Registering..."
                         : "Register"}
                 </button>
+
             </form>
 
             <p className="auth-link">
