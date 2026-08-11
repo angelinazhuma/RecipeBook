@@ -25,6 +25,8 @@ public class QRCodeService {
               300
           );
 
+
+// data is written to bytes
       ByteArrayOutputStream stream =
           new ByteArrayOutputStream();
 

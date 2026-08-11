@@ -52,8 +52,6 @@ public class MfaController {
         mfaService.generateSecret();
 
     user.setMfaSecret(secret);
-    user.setMfaEnabled(false);
-
     userRepository.save(user);
 
     String issuer = "RecipeBook"; //identifies recipebook
@@ -72,7 +70,7 @@ public class MfaController {
             + "&issuer="
             + issuer;
 
-// outauthutl to qrcodeservice
+// otpauthurl to qrcodeservice
     String qrCode =
         qrCodeService.generateQRCode(
             otpAuthUrl // url to qr code

@@ -91,11 +91,11 @@ export default function Navigation() {
                         Add recipe
                     </Link>
 
-
+                    {currentUser && !currentUser.mfaEnabled && (
                         <Link href="/mfa/setup">
                             Enable MFA
                         </Link>
-
+                    )}
 
                     <button
                         type="button"

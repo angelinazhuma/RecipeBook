@@ -111,7 +111,7 @@ public class JwtService {
     public boolean isMfaPending(String token) {
         Boolean mfaPending =
             extractAllClaims(token)
-                .get("mfaPending", Boolean.class); //get intormation about the type og data like the object in other method
+                .get("mfaPending", Boolean.class); //get information about the type of data like the object in another method
 
         return Boolean.TRUE.equals(mfaPending);
     }

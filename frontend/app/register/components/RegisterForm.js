@@ -152,7 +152,6 @@ export default function RegisterForm() {
                     <span className="password-strength-label">
         Strength of password
     </span>
-
                     <div className="power-container">
                         <div
                             className="power-point"

@@ -10,7 +10,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
- @Builder
+@Builder
 public class RecipeResponseDTO {
 
     private Long id;

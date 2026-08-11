@@ -50,7 +50,7 @@ export default function List({
 
                     <h4>Ingredients</h4>
 
-                    {/* display  list of recipe ingredients */}
+                    {/* display list of recipe ingredients */}
                     <ul>
                         {recipe.ingredients.map(
                             (ingredient, index) => (
