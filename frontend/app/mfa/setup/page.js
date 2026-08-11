@@ -7,11 +7,18 @@ const API_URL =
     "http://172.17.222.129:8080";
 
 export default function MfaSetupPage() {
-    const [qrCode, setQrCode] = useState("");
-    const [code, setCode] = useState("");
-    const [message, setMessage] = useState("");
+
+    const [qrCode, setQrCode] =
+        useState("");
+
+    const [code, setCode] =
+        useState("");
+
+    const [message, setMessage] =
+        useState("");
 
     async function setupMfa() {
+
         const response = await fetch(
             `${API_URL}/auth/mfa/setup`,
             {
@@ -20,20 +27,25 @@ export default function MfaSetupPage() {
             }
         );
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         setQrCode(data.qrCode);
     }
 
     async function enableMfa() {
+
         const response = await fetch(
             `${API_URL}/auth/mfa/enable`,
             {
                 method: "POST",
                 credentials: "include",
+
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type":
+                        "application/json",
                 },
+
                 body: JSON.stringify({
                     code,
                 }),
@@ -41,58 +53,105 @@ export default function MfaSetupPage() {
         );
 
         if (!response.ok) {
-            setMessage("Invalid code");
+            setMessage(
+                "Invalid code"
+            );
             return;
         }
 
-        setMessage("MFA enabled successfully");
+        setMessage(
+            "MFA enabled successfully"
+        );
     }
 
     return (
-        <main>
-            <h1>Enable MFA</h1>
+        <main className="mfa-page">
 
-            {!qrCode && (
-                <button
-                    className="app-button"
-                    onClick={setupMfa}>
-                    Generate QR code
-                </button>
-            )}
+            <div className="mfa-card">
 
-            {qrCode && (
-                <>
-                    <p>
-                        Scan this QR code with
-                        Google Authenticator and enter the
-                        code below.
+                <h1>
+                    Enable MFA
+                </h1>
+
+                {!qrCode && (
+
+                    <div className="mfa-start">
+
+                        <p className="mfa-description">
+                            Add an extra layer of
+                            security to your account
+                            with two-factor authentication.
+                        </p>
+
+                        <button
+                            className="app-button"
+                            onClick={setupMfa}
+                        >
+                            Generate QR code
+                        </button>
+
+                    </div>
+                )}
+
+                {qrCode && (
+                    <>
+                        <p className="mfa-description">
+                            Scan this QR code with
+                            Google Authenticator and
+                            enter the 6-digit code below.
+                        </p>
+
+                        <div className="mfa-qr-container">
+
+                            <img
+                                className="mfa-qr"
+                                src={
+                                    `data:image/png;base64,${qrCode}`
+                                }
+                                alt="MFA QR code"
+                            />
+
+                        </div>
+
+                        <div className="mfa-form">
+
+                            <label htmlFor="mfa-code">
+                                Verification code
+                            </label>
+
+                            <input
+                                id="mfa-code"
+                                type="text"
+                                inputMode="numeric"
+                                maxLength={6}
+                                placeholder="1 2 3 4 5 6"
+                                value={code}
+                                onChange={(event) =>
+                                    setCode(
+                                        event.target.value
+                                    )
+                                }
+                            />
+
+                            <button
+                                className="mfa-enable-button"
+                                onClick={enableMfa}
+                            >
+                                Enable MFA
+                            </button>
+
+                        </div>
+                    </>
+                )}
+
+                {message && (
+                    <p className="mfa-message">
+                        {message}
                     </p>
+                )}
 
-                    <img
-                        src={`data:image/png;base64,${qrCode}`}
-                        alt="MFA QR code"
-                    />
+            </div>
 
-                    <input
-                        type="text"
-                        placeholder="123456"
-                        value={code}
-                        onChange={(event) =>
-                            setCode(event.target.value)
-                        }
-                    />
-
-                    <button
-                        className="app-button"
-                        onClick={enableMfa}>
-                        Enable MFA
-                    </button>
-                </>
-            )}
-
-            {message && (
-                <p>{message}</p>
-            )}
         </main>
     );
 }

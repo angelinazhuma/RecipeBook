@@ -51,30 +51,55 @@ export default function MfaPage() {
     }
 
     return (
-        <main>
-            <h1>
-                Two-Factor Authentication
-            </h1>
+        <main className="mfa-verify-page">
 
-            <input
-                type="text"
-                placeholder="123456"
-                value={code}
-                maxLength={6}
-                onChange={(event) =>
-                    setCode(event.target.value)
-                }
-            />
+            <div className="mfa-verify-card">
 
-            <button
-                className="app-button"
-                onClick={verify}>
-                Verify
-            </button>
+                <h1>
+                    Two-Factor Authentication
+                </h1>
 
-            {error && (
-                <p>{error}</p>
-            )}
+                <p className="mfa-verify-description">
+                    Enter the 6-digit code from
+                    Google Authenticator.
+                </p>
+
+                <div className="mfa-verify-form">
+
+                    <label htmlFor="mfa-code">
+                        Verification code
+                    </label>
+
+                    <input
+                        id="mfa-code"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="123456"
+                        value={code}
+                        maxLength={6}
+                        onChange={(event) =>
+                            setCode(
+                                event.target.value
+                            )
+                        }
+                    />
+
+                    <button
+                        className="mfa-verify-button"
+                        onClick={verify}
+                    >
+                        Verify
+                    </button>
+
+                </div>
+
+                {error && (
+                    <p className="mfa-error">
+                        {error}
+                    </p>
+                )}
+
+            </div>
+
         </main>
-    );
-}
+    );}
