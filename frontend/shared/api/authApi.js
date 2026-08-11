@@ -102,22 +102,22 @@ async function handleResponse(
     response,
     fallbackMessage
 ) {
-    if (!response.ok) {
-        const errorText =
-            await response.text();
+    const data =
+        await response.json();
 
+    if (!response.ok) {
         return {
             success: false,
             data: null,
             error:
-                errorText ||
+                data.message ||
                 fallbackMessage,
         };
     }
 
     return {
         success: true,
-        data: await response.json(),
+        data: data,
         error: null,
     };
 }

@@ -15,10 +15,20 @@ import java.util.Base64;
 public class MfaSecretEncryptionService {
 
   private static final String ALGORITHM =
-      "AES/GCM/NoPadding";
+      "AES/GCM/NoPadding"; // AES in Galois/Counter Mode (GCM) with no padding
 
-  private static final int IV_LENGTH = 12;
-  private static final int TAG_LENGTH = 128;
+  // GCM - Galois/Counter Mode
+  //
+  // GCM is a symmetric block cipher mode of operation that provides authenticated encryption.
+  // It is designed to be more secure than CBC and CTR modes, and is more efficient than
+  // CCM and EAX modes.
+
+  // No
+
+  private static final int IV_LENGTH = 12; // Recommended IV length for GCM is 12 bytes (96 bits)
+   // IV is randomly generated order of bytes used with encryption key
+  private static final int TAG_LENGTH = 128; // Authentication tag length in bits
+  // confirms integrity and completeness
 
   private final SecretKeySpec key;
 
@@ -38,22 +48,28 @@ public class MfaSecretEncryptionService {
   }
 
   public String encrypt(String value) {
-    try {
+    try { // 1. Generate a random IV (Initialization Vector)
       byte[] iv = new byte[IV_LENGTH];
 
-      new SecureRandom()
-          .nextBytes(iv);
+      SecureRandom secureRandom =
+          new SecureRandom();
 
+      secureRandom.nextBytes(iv);
+
+// 2. Initialize the cipher in ENCRYPT_MODE
       Cipher cipher =
           Cipher.getInstance(ALGORITHM);
+
+      GCMParameterSpec parameterSpec =
+          new GCMParameterSpec(
+              TAG_LENGTH,
+              iv
+          );
 
       cipher.init(
           Cipher.ENCRYPT_MODE,
           key,
-          new GCMParameterSpec(
-              TAG_LENGTH,
-              iv
-          )
+          parameterSpec
       );
 
       byte[] encrypted =
@@ -63,8 +79,9 @@ public class MfaSecretEncryptionService {
               )
           );
 
-      byte[] result =
-          ByteBuffer.allocate(
+      byte[] combined =
+          ByteBuffer
+              .allocate(
                   iv.length +
                       encrypted.length
               )
@@ -72,12 +89,13 @@ public class MfaSecretEncryptionService {
               .put(encrypted)
               .array();
 
-      return Base64.getEncoder()
-          .encodeToString(result);
+      return Base64
+          .getEncoder()
+          .encodeToString(combined);
 
     } catch (Exception e) {
       throw new IllegalStateException(
-          "Could not encrypt MFA secret",
+          "MFA secret encryption failed",
           e
       );
     }
@@ -85,12 +103,12 @@ public class MfaSecretEncryptionService {
 
   public String decrypt(String value) {
     try {
-      byte[] decoded =
+      byte[] combined =
           Base64.getDecoder()
               .decode(value);
 
       ByteBuffer buffer =
-          ByteBuffer.wrap(decoded);
+          ByteBuffer.wrap(combined);
 
       byte[] iv =
           new byte[IV_LENGTH];
@@ -107,23 +125,29 @@ public class MfaSecretEncryptionService {
       Cipher cipher =
           Cipher.getInstance(ALGORITHM);
 
-      cipher.init(
-          Cipher.DECRYPT_MODE,
-          key,
+      GCMParameterSpec parameterSpec =
           new GCMParameterSpec(
               TAG_LENGTH,
               iv
-          )
+          );
+
+      cipher.init(
+          Cipher.DECRYPT_MODE,
+          key,
+          parameterSpec
       );
 
+      byte[] decrypted =
+          cipher.doFinal(encrypted);
+
       return new String(
-          cipher.doFinal(encrypted),
+          decrypted,
           StandardCharsets.UTF_8
       );
 
     } catch (Exception e) {
       throw new IllegalStateException(
-          "Could not decrypt MFA secret",
+          "MFA secret decryption failed",
           e
       );
     }

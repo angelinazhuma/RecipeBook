@@ -4,7 +4,6 @@ import com.example.demo.authorization.DTO.MfaCodeRequestDTO;
 import com.example.demo.authorization.DTO.MfaLoginRequestDTO;
 import com.example.demo.authorization.DTO.MfaSetupResponseDTO;
 import com.example.demo.authorization.model.User;
-import com.example.demo.authorization.repository.UserRepository;
 import com.example.demo.authorization.security.AuthenticatedUser;
 import com.example.demo.authorization.security.JwtService;
 import com.example.demo.authorization.service.MfaService;
@@ -26,13 +25,12 @@ import java.nio.charset.StandardCharsets;
 public class MfaController {
 
   private final MfaService mfaService;
-  private final UserRepository userRepository;
   private final QRCodeService qrCodeService;
   private final JwtService jwtService;
   private final CookieUtils cookieUtils;
 
   @PostMapping("/setup")
-  public MfaSetupResponseDTO setup(
+  public ResponseEntity<?> setup(
       Authentication authentication
   ) {
 
@@ -40,46 +38,43 @@ public class MfaController {
         (AuthenticatedUser)
             authentication.getPrincipal();
 
-    User user = userRepository
-        .findById(currentUser.id())
-        .orElseThrow(() ->
-            new IllegalArgumentException(
-                "User not found"
-            )
+    MfaService.MfaSetupResult result =
+        mfaService.setupMfa(
+            currentUser.id()
         );
 
-    String secret =
-        mfaService.generateSecret();
+    if (result == null) {
+      return ResponseEntity
+          .badRequest()
+          .body("Could not setup MFA");
+    }
 
-    user.setMfaSecret(secret);
-    userRepository.save(user);
+    String issuer = "RecipeBook";
 
-    String issuer = "RecipeBook"; //identifies recipebook
-
-    // structs the url for the qr code
     String otpAuthUrl =
         "otpauth://totp/"
-            + issuer //identifies recipebook
+            + issuer
             + ":"
             + URLEncoder.encode(
-            user.getUsername(),
-            StandardCharsets.UTF_8 // takes username and encodes it to url
+            result.user().getUsername(),
+            StandardCharsets.UTF_8
         )
             + "?secret="
-            + secret // secret key
+            + result.secret()
             + "&issuer="
             + issuer;
 
-// otpauthurl to qrcodeservice
     String qrCode =
         qrCodeService.generateQRCode(
-            otpAuthUrl // url to qr code
+            otpAuthUrl
         );
 
-    return new MfaSetupResponseDTO(qrCode);
-}
+    return ResponseEntity.ok(
+        new MfaSetupResponseDTO(qrCode)
+    );
+  }
   @PostMapping("/enable")
-  public void enableMfa(
+  public ResponseEntity<?> enableMfa(
       @RequestBody MfaCodeRequestDTO request,
       Authentication authentication
   ) {
@@ -88,40 +83,32 @@ public class MfaController {
         (AuthenticatedUser)
             authentication.getPrincipal();
 
-    User user = userRepository
-        .findById(currentUser.id())
-        .orElseThrow(() ->
-            new IllegalArgumentException(
-                "User not found"
-            )
-        );
-
-    boolean valid =
-        mfaService.verifyCode(
-            user.getMfaSecret(),
+    boolean success =
+        mfaService.enableMfa(
+            currentUser.id(),
             request.code()
         );
 
-    if (!valid) {
-      throw new IllegalArgumentException(
-          "Invalid MFA code"
-      );
+    if (!success) {
+      return ResponseEntity
+          .badRequest()
+          .body("Invalid MFA code");
     }
 
-    user.setMfaEnabled(true);
-
-    userRepository.save(user);
+    return ResponseEntity.ok().build();
   }
 
   @PostMapping("/verify-login")
-  public ResponseEntity<Void> verifyLogin(
+  public ResponseEntity<?> verifyLogin(
       @RequestBody MfaLoginRequestDTO request
   ) {
 
-    if (!jwtService.isMfaPending(request.mfaToken())) {
-      throw new IllegalArgumentException(
-          "Invalid MFA token"
-      );
+    if (!jwtService.isMfaPending(
+        request.mfaToken()
+    )) {
+      return ResponseEntity
+          .badRequest()
+          .body("Invalid MFA token");
     }
 
     Long userId =
@@ -130,23 +117,15 @@ public class MfaController {
         );
 
     User user =
-        userRepository.findById(userId)
-            .orElseThrow(() ->
-                new IllegalArgumentException(
-                    "User not found"
-                )
-            );
-
-    boolean valid =
-        mfaService.verifyCode(
-            user.getMfaSecret(),
+        mfaService.verifyLogin(
+            userId,
             request.code()
         );
 
-    if (!valid) {
-      throw new IllegalArgumentException(
-          "Invalid code"
-      );
+    if (user == null) {
+      return ResponseEntity
+          .badRequest()
+          .body("Invalid MFA code");
     }
 
     String jwt =

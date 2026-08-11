@@ -9,6 +9,7 @@ import com.example.demo.authorization.utils.CookieUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,17 @@ public class LoginController {
   ) {
 
     User user = userService.login(request);
+    if (user == null) {
+      return ResponseEntity
+          .status(HttpStatus.UNAUTHORIZED)
+          .body(
+              new LoginResultDTO(
+                  false,
+                  null,
+                  "Invalid username/email or password"
+              )
+          );
+    }
 
     if (user.isMfaEnabled()) {
 

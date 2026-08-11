@@ -48,23 +48,29 @@ public class UserService {
 
   public User login(LoginRequestDTO request) {
 
-    User user = userRepository.findByUsername(request.getLogin())
-            .orElseGet(() -> userRepository.findByEmail(request.getLogin())
-                    .orElseThrow(() ->
-                            new IllegalArgumentException("User not found")
-                    ));
+    User user = userRepository
+        .findByUsername(request.getLogin())
+        .orElseGet(() ->
+            userRepository
+                .findByEmail(request.getLogin())
+                .orElse(null)
+        );
 
-    boolean passwordMatches = passwordEncoder.matches(
+    if (user == null) {
+      return null;
+    }
+
+    boolean passwordMatches =
+        passwordEncoder.matches(
             request.getPassword(),
             user.getPasswordHash()
-    );
+        );
 
     if (!passwordMatches) {
-      throw new IllegalArgumentException("Incorrect password");
+      return null;
     }
 
     return user;
   }
-
 
 }
