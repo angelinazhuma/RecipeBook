@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: add-mfa-kem-ciphertext
+      author: angelina
+      changes:
+
+        - addColumn:
+            tableName: app_users
+            columns:
+
+              - column:
+                  name: mfa_kem_ciphertext
+                  type: TEXT

@@ -42,4 +42,11 @@ public class User {
 
   @Column(name = "mfa_secret")
   private String mfaSecret;
+
+  @Column(
+      name = "mfa_kem_ciphertext",
+      columnDefinition = "TEXT"
+  )
+  private String mfaKemCiphertext;
+
 }

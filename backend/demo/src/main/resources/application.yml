@@ -22,3 +22,7 @@ security:
     expiration-ms: 3600000 # 1 hour
 
 mfa.encryption.key: ${MFA_ENCRYPTION_KEY}
+
+mlkem:
+  public-key: ${MLKEM_PUBLIC_KEY}
+  private-key: ${MLKEM_PRIVATE_KEY}

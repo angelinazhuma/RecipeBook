@@ -13,12 +13,15 @@ import dev.samstevens.totp.time.TimeProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
+
 @Service
 @RequiredArgsConstructor
 public class MfaService {
 
   private final UserRepository userRepository;
   private final MfaSecretEncryptionService encryptionService;
+  private final MlKemService mlKemService;
 
   public String generateSecret() {
     SecretGenerator secretGenerator =
@@ -63,23 +66,44 @@ public class MfaService {
     String secret =
         generateSecret();
 
-    String encryptedSecret =
-        encryptionService.encrypt(
-            secret
-        );
+    try {
+      MlKemService.MlKemEncapsulation encapsulation =
+          mlKemService.encapsulate();
 
-    user.setMfaSecret(
-        encryptedSecret
-    );
+      String encryptedSecret =
+          encryptionService.encrypt(
+              secret,
+              encapsulation.sharedSecret()
+          ); // encrypts the secret with the shared secret
 
-    user.setMfaEnabled(false);
+      String kemCiphertext =
+          Base64.getEncoder()
+              .encodeToString(
+                  encapsulation.kemCiphertext()
+              );
 
-    userRepository.save(user);
+      user.setMfaSecret(
+          encryptedSecret
+      );
 
-    return new MfaSetupResult(
-        user,
-        secret
-    );
+      user.setMfaKemCiphertext(
+          kemCiphertext
+      );
+
+
+      userRepository.save(user);
+
+      return new MfaSetupResult(
+          user,
+          secret
+      );
+
+    } catch (Exception e) {
+      throw new IllegalStateException(
+          "MFA setup failed",
+          e
+      );
+    }
   }
 
   public boolean enableMfa(
@@ -94,14 +118,15 @@ public class MfaService {
       return false;
     }
 
-    if (user.getMfaSecret() == null) {
+    if (
+        user.getMfaSecret() == null ||
+            user.getMfaKemCiphertext() == null
+    ) {
       return false;
     }
 
     String secret =
-        encryptionService.decrypt(
-            user.getMfaSecret()
-        );
+        decryptMfaSecret(user);
 
     boolean valid =
         verifyCode(
@@ -119,7 +144,6 @@ public class MfaService {
 
     return true;
   }
-
   public User verifyLogin(
       Long userId,
       String code
@@ -132,14 +156,15 @@ public class MfaService {
       return null;
     }
 
-    if (user.getMfaSecret() == null) {
+    if (
+        user.getMfaSecret() == null ||
+            user.getMfaKemCiphertext() == null
+    ) {
       return null;
     }
 
     String secret =
-        encryptionService.decrypt(
-            user.getMfaSecret()
-        );
+        decryptMfaSecret(user);
 
     boolean valid =
         verifyCode(
@@ -158,5 +183,28 @@ public class MfaService {
       User user,
       String secret
   ) {
+  } // dara record which is not changable
+  // it is for hetting back the user and opened TOTP secret from setupMfa method
+
+  private String decryptMfaSecret(
+      User user
+  ) {
+
+    byte[] kemCiphertext =
+        Base64.getDecoder()
+            .decode(
+                user.getMfaKemCiphertext()
+            );
+
+    byte[] sharedSecret =
+        mlKemService.decapsulate(
+            kemCiphertext
+        );
+
+    return encryptionService.decrypt(
+        user.getMfaSecret(),
+        sharedSecret
+    );
   }
+
 }

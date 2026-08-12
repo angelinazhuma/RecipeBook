@@ -74,3 +74,5 @@ databaseChangeLog: # zdes nahodjtsa izmenenija bazi daniih
       file: db/changelog/2026-08-06-add-role-to-users.yaml
   - include:
       file: db/changelog/2026-08-07-add-mfa-to-users.yaml
+  - include:
+      file: db/changelog/2026-08-11-add-mfa-kem-ciphertext.yaml
