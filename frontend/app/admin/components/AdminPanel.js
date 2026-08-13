@@ -102,7 +102,6 @@ export default function AdminPanel() {
         }
     }
 
-
     function closeRecipes() {
 
         setSelectedUser(null);
@@ -143,8 +142,7 @@ export default function AdminPanel() {
                         </h1>
 
                         <p>
-                            Manage users and
-                            view their recipes
+                            Manage users and view their recipes
                         </p>
                     </div>
 
@@ -161,7 +159,6 @@ export default function AdminPanel() {
                 {selectedUser && (
 
                     <section className="admin-recipes-section">
-
                         <div className="admin-recipes-header">
                             <div>
                                 <h2>
@@ -172,18 +169,14 @@ export default function AdminPanel() {
                                 </h2>
 
                                 <p>
-
                                     {recipes.length}{" "}
-
                                     {
                                         recipes.length === 1
                                             ? "recipe"
                                             : "recipes"
                                     }
-
                                 </p>
                             </div>
-
 
                             <button
                                 type="button"
@@ -253,7 +246,6 @@ export default function AdminPanel() {
                                             </h4>
 
                                             <ul>
-
                                                 {
                                                     recipe.ingredients
                                                         ?.map(
@@ -261,7 +253,6 @@ export default function AdminPanel() {
                                                                 ingredient,
                                                                 index
                                                             ) => (
-
                                                                 <li
                                                                     key={
                                                                         index
@@ -270,15 +261,12 @@ export default function AdminPanel() {
                                                                     {
                                                                         ingredient.name
                                                                     }{" "}
-
                                                                     {
                                                                         ingredient.amount
                                                                     }{" "}
-
                                                                     {
                                                                         ingredient.unit
                                                                     }
-
                                                                 </li>
 
                                                             )
@@ -286,11 +274,9 @@ export default function AdminPanel() {
                                                 }
 
                                             </ul>
-
                                         </article>
                                     )
                                 )}
-
                             </div>
                         )}
                     </section>
@@ -306,7 +292,7 @@ export default function AdminPanel() {
                             </h2>
 
                             <p>
-                                Search by username or email
+                                Search users by username or email
                             </p>
                         </div>
 
@@ -320,18 +306,12 @@ export default function AdminPanel() {
 
                     </div>
                     {loading && (
-
-                        <p className="admin-status">
-                            Loading users...
-                        </p>
+                        <p className="admin-status"> Loading users... </p>
 
                     )}
 
                     {error && (
-
-                        <p className="error-message">
-                            {error}
-                        </p>
+                        <p className="error-message"> {error} </p>
 
                     )}
 
@@ -462,7 +442,6 @@ export default function AdminPanel() {
                                                 nextPage
                                             }
                                         >
-
                                             Next
 
                                         </button>
@@ -472,8 +451,6 @@ export default function AdminPanel() {
                         )}
                 </section>
             </div>
-
         </main>
-
     );
 }

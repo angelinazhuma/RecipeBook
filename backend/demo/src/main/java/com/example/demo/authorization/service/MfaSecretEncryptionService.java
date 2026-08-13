@@ -23,9 +23,10 @@ public class MfaSecretEncryptionService {
   // GCM is a symmetric block cipher mode of operation that provides authenticated encryption.
 
   // No padding - it does not add any padding to the message, because of GCM
-  // NOSuchAlghoritmEXception, javaprobider does not support AESGCM
-  // AESGCM - dont add extra bytes for aligning, tou dont need them
-  //GCm dont need padding for alligning blocks
+  // NOSuchAlghoritmEXception, javaprovider does not support AESGCM
+  // AESGCM - dont add extra bytes for aligning, they dont need them
+
+  //GCM dont need padding for alligning blocks
 
   private static final int IV_LENGTH = 12; // Recommended IV length for GCM is 12 bytes (96 bits)
    // IV is randomly generated order of bytes used with encryption key
@@ -78,7 +79,7 @@ public class MfaSecretEncryptionService {
   }
 
   public String decrypt(
-      String value, // text which i need to decrypt
+      String value, // text that I need to decrypt
       byte[] sharedSecret
   ) {
     try {SecretKeySpec key = createAesKey(sharedSecret);
@@ -92,6 +93,8 @@ public class MfaSecretEncryptionService {
       byte[] iv = new byte[IV_LENGTH]; // Take out IV as 12 bytes
 
       buffer.get(iv); // get() method reads a sequence of bytes from this buffer
+
+      // here is the iv which was used for encrypting, now decrypt
 
       byte[] encrypted = new byte[
               buffer.remaining()
@@ -107,7 +110,7 @@ public class MfaSecretEncryptionService {
       // tag is for checking that data was not changed or replaced by an attacker
       // decrypt this data only if the tag is correct and the data was not changed
 
-      // here is the key and here is IV, which was used for encrypting, now decrypt
+      // here is the key, and here is IV, which was used for encrypting, now decrypt
 
       cipher.init(
           Cipher.DECRYPT_MODE, key, parameterSpec
@@ -136,13 +139,13 @@ public class MfaSecretEncryptionService {
                                       // nowits just a array of bytes we want to get it to aes key
   ) {
     try {
-      MessageDigest digest =
+      MessageDigest messageDigest =
           MessageDigest.getInstance( // make an algorithm which can read hash with provided alghotritm
               "SHA-256" // SHA-256 is a cryptographic hash function that produces a 256-bit (32-byte) hash value
-          );
+          ); //   derive the aes key material from the MLKEM shared secret
 
       byte[] keyBytes =
-          digest.digest(// method that produces a hash value from the input data
+          messageDigest.digest(// method that produces a hash value from the input data
               // derives 32 bytes (256 bits) from the ML-KEM shared secret using SHA-256
               sharedSecret // SHA256 - keybytes = 32 bytes
           );

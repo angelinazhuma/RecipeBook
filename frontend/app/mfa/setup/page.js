@@ -139,7 +139,6 @@ export default function MfaSetupPage() {
                             >
                                 Enable MFA
                             </button>
-
                         </div>
                     </>
                 )}
@@ -151,7 +150,6 @@ export default function MfaSetupPage() {
                 )}
 
             </div>
-
         </main>
     );
 }

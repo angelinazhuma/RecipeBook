@@ -63,8 +63,7 @@ public class MfaService {
       return null;
     }
 
-    String secret =
-        generateSecret();
+    String secret = generateSecret();
 
     try {
       MlKemService.MlKemEncapsulation encapsulation =
@@ -90,7 +89,6 @@ public class MfaService {
           kemCiphertext
       );
 
-
       userRepository.save(user);
 
       return new MfaSetupResult(
@@ -114,9 +112,7 @@ public class MfaService {
         .findById(userId)
         .orElse(null);
 
-    if (user == null) {
-      return false;
-    }
+    if (user == null) {return false;}
 
     if (
         user.getMfaSecret() == null ||
@@ -134,9 +130,7 @@ public class MfaService {
             code
         );
 
-    if (!valid) {
-      return false;
-    }
+    if (!valid) {return false;}
 
     user.setMfaEnabled(true);
 
@@ -148,13 +142,9 @@ public class MfaService {
       Long userId,
       String code
   ) {
-    User user = userRepository
-        .findById(userId)
-        .orElse(null);
+    User user = userRepository.findById(userId).orElse(null);
 
-    if (user == null) {
-      return null;
-    }
+    if (user == null) {return null;}
 
     if (
         user.getMfaSecret() == null ||
@@ -163,8 +153,7 @@ public class MfaService {
       return null;
     }
 
-    String secret =
-        decryptMfaSecret(user);
+    String secret = decryptMfaSecret(user);
 
     boolean valid =
         verifyCode(
@@ -172,9 +161,7 @@ public class MfaService {
             code
         );
 
-    if (!valid) {
-      return null;
-    }
+    if (!valid) {return null;}
 
     return user;
   }
@@ -183,8 +170,8 @@ public class MfaService {
       User user,
       String secret
   ) {
-  } // dara record which is not changable
-  // it is for hetting back the user and opened TOTP secret from setupMfa method
+  } // dara record that is not changeable
+  // it is for getting back the user and opened TOTP secret from setupMfa method
 
   private String decryptMfaSecret(
       User user
