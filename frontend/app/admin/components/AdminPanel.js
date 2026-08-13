@@ -1,11 +1,8 @@
 "use client";
-
 import {
     useEffect,
-    useMemo,
     useState,
 } from "react";
-
 import {
     fetchAllUsers,
     fetchUserRecipes,
@@ -15,36 +12,53 @@ const USERS_PER_PAGE = 10;
 
 export default function AdminPanel() {
 
-    const [users, setUsers] =
-        useState([]);
-
-    const [recipes, setRecipes] =
-        useState([]);
-
-    const [selectedUser, setSelectedUser] =
-        useState(null);
-
-    const [search, setSearch] =
-        useState("");
-
-    const [page, setPage] =
-        useState(1);
-
-    const [loading, setLoading] =
-        useState(true);
-
-    const [error, setError] =
-        useState("");
+    const [users, setUsers] = useState([]);
+    const [recipes, setRecipes] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
+    // Spring pagination starts from page 0
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
+
         async function loadUsers() {
+
             try {
                 setLoading(true);
+                setError("");
 
                 const data =
-                    await fetchAllUsers();
+                    await fetchAllUsers(
+                        page,
+                        USERS_PER_PAGE,
+                        search
+                    );
+                /*
+                 * Backend returns Page<User>
+                 *
+                 * data.content =
+                 * users of the current page
+                 */
+                setUsers(data.content);
 
-                setUsers(data);
+                /*
+                 * Total number of pages
+                 * is calculated by backend
+                 */
+                setTotalPages(
+                    data.totalPages
+                );
+                /*
+                 * Total number of users
+                 * in the database
+                 */
+                setTotalUsers(
+                    data.totalElements
+                );
 
             } catch (err) {
                 setError(
@@ -52,64 +66,21 @@ export default function AdminPanel() {
                     "Failed to load users"
                 );
             } finally {
+
                 setLoading(false);
             }
         }
-
         loadUsers();
-    }, []);
 
-    const filteredUsers =
-        useMemo(() => {
+    }, [page, search]);
 
-            const value =
-                search
-                    .trim()
-                    .toLowerCase();
-
-            if (!value) {
-                return users;
-            }
-
-            return users.filter((user) => {
-
-                const username =
-                    user.username
-                        ?.toLowerCase() || "";
-
-                const email =
-                    user.email
-                        ?.toLowerCase() || "";
-
-                return (
-                    username.includes(value) ||
-                    email.includes(value)
-                );
-            });
-
-        }, [users, search]);
-
-    const totalPages =
-        Math.max(
-            1,
-            Math.ceil(
-                filteredUsers.length /
-                USERS_PER_PAGE
-            )
-        );
-
-    const startIndex =
-        (page - 1) * USERS_PER_PAGE;
-
-    const visibleUsers =
-        filteredUsers.slice(
-            startIndex,
-            startIndex + USERS_PER_PAGE
-        );
-
+    /*
+     * Loads recipes of selected user.
+     */
     async function handleUserClick(user) {
-
         try {
+            setError("");
+
             const data =
                 await fetchUserRecipes(
                     user.id
@@ -131,27 +102,41 @@ export default function AdminPanel() {
         }
     }
 
-    function handleSearch(event) {
-
-        setSearch(
-            event.target.value
-        );
-
-        setPage(1);
-    }
 
     function closeRecipes() {
+
         setSelectedUser(null);
         setRecipes([]);
     }
 
+    function previousPage() {
+
+        if (page > 0) {
+            setPage(page - 1);
+        }
+    }
+    /*
+     * Next backend page.
+     */
+    function nextPage() {
+
+        if (page < totalPages - 1) {
+            setPage(page + 1);
+        }
+    }
+
+    function handleSearch(event) {
+        setSearch(event.target.value);
+        setPage(0);
+    }
+
     return (
+
         <main className="admin-page">
 
             <div className="admin-container">
 
                 <div className="admin-header">
-
                     <div>
                         <h1>
                             Admin panel
@@ -164,17 +149,20 @@ export default function AdminPanel() {
                     </div>
 
                     <div className="admin-user-count">
-                        {users.length} users
-                    </div>
 
+                        {totalUsers} users
+
+                    </div>
                 </div>
+
+
+                {/* SELECTED USER RECIPES */}
 
                 {selectedUser && (
 
                     <section className="admin-recipes-section">
 
                         <div className="admin-recipes-header">
-
                             <div>
                                 <h2>
                                     Recipes of{" "}
@@ -184,12 +172,18 @@ export default function AdminPanel() {
                                 </h2>
 
                                 <p>
+
                                     {recipes.length}{" "}
-                                    {recipes.length === 1
-                                        ? "recipe"
-                                        : "recipes"}
+
+                                    {
+                                        recipes.length === 1
+                                            ? "recipe"
+                                            : "recipes"
+                                    }
+
                                 </p>
                             </div>
+
 
                             <button
                                 type="button"
@@ -198,7 +192,6 @@ export default function AdminPanel() {
                             >
                                 Close
                             </button>
-
                         </div>
 
                         {recipes.length === 0 ? (
@@ -218,7 +211,6 @@ export default function AdminPanel() {
                                             key={recipe.id}
                                             className="recipe-card"
                                         >
-
                                             <h3>
                                                 {recipe.name}
                                             </h3>
@@ -227,6 +219,7 @@ export default function AdminPanel() {
                                                 <strong>
                                                     Author:
                                                 </strong>{" "}
+
                                                 {recipe.author}
                                             </p>
 
@@ -234,6 +227,7 @@ export default function AdminPanel() {
                                                 <strong>
                                                     Description:
                                                 </strong>{" "}
+
                                                 {
                                                     recipe.recipeDescription
                                                 }
@@ -243,12 +237,15 @@ export default function AdminPanel() {
                                                 <strong>
                                                     Created:
                                                 </strong>{" "}
-                                                {recipe.createdAt
-                                                    ? new Date(
-                                                        recipe.createdAt
-                                                    )
-                                                        .toLocaleDateString()
-                                                    : ""}
+
+                                                {
+                                                    recipe.createdAt
+                                                        ? new Date(
+                                                            recipe.createdAt
+                                                        )
+                                                            .toLocaleDateString()
+                                                        : ""
+                                                }
                                             </p>
 
                                             <h4>
@@ -256,29 +253,38 @@ export default function AdminPanel() {
                                             </h4>
 
                                             <ul>
-                                                {recipe.ingredients
-                                                    ?.map(
-                                                        (
-                                                            ingredient,
-                                                            index
-                                                        ) => (
-                                                            <li
-                                                                key={
-                                                                    index
-                                                                }
-                                                            >
-                                                                {
-                                                                    ingredient.name
-                                                                }{" "}
-                                                                {
-                                                                    ingredient.amount
-                                                                }{" "}
-                                                                {
-                                                                    ingredient.unit
-                                                                }
-                                                            </li>
+
+                                                {
+                                                    recipe.ingredients
+                                                        ?.map(
+                                                            (
+                                                                ingredient,
+                                                                index
+                                                            ) => (
+
+                                                                <li
+                                                                    key={
+                                                                        index
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        ingredient.name
+                                                                    }{" "}
+
+                                                                    {
+                                                                        ingredient.amount
+                                                                    }{" "}
+
+                                                                    {
+                                                                        ingredient.unit
+                                                                    }
+
+                                                                </li>
+
+                                                            )
                                                         )
-                                                    )}
+                                                }
+
                                             </ul>
 
                                         </article>
@@ -287,12 +293,11 @@ export default function AdminPanel() {
 
                             </div>
                         )}
-
                     </section>
                 )}
 
+                {/* USERS */}
                 <section className="admin-users-card">
-
                     <div className="admin-users-top">
 
                         <div>
@@ -301,8 +306,7 @@ export default function AdminPanel() {
                             </h2>
 
                             <p>
-                                Search by username
-                                or email
+                                Search by username or email
                             </p>
                         </div>
 
@@ -315,79 +319,80 @@ export default function AdminPanel() {
                         />
 
                     </div>
-
                     {loading && (
+
                         <p className="admin-status">
                             Loading users...
                         </p>
+
                     )}
 
                     {error && (
+
                         <p className="error-message">
                             {error}
                         </p>
+
                     )}
 
                     {!loading &&
-                        filteredUsers.length === 0 && (
+                        !error &&
+                        users.length === 0 && (
 
                             <p className="admin-status">
                                 No users found
                             </p>
+
                         )}
 
                     {!loading &&
-                        filteredUsers.length > 0 && (
-
+                        users.length > 0 && (
                             <>
                                 <div className="admin-table">
-
                                     <div className="admin-table-header">
 
                                         <span>
                                             Username
                                         </span>
-
                                         <span>
                                             Email
                                         </span>
-
                                         <span>
                                             Role
                                         </span>
-
                                         <span>
                                             Action
                                         </span>
-
                                     </div>
 
-                                    {visibleUsers.map(
+                                    {users.map(
                                         (user) => (
 
                                             <div
                                                 className="admin-user-row"
                                                 key={user.id}
                                             >
-
                                                 <div className="admin-user-name">
-
                                                     <div className="admin-avatar">
-                                                        {user.username
-                                                            ?.charAt(0)
-                                                            .toUpperCase()}
-                                                    </div>
 
+                                                        {
+                                                            user.username
+                                                                ?.charAt(0)
+                                                                .toUpperCase()
+                                                        }
+
+                                                    </div>
                                                     <span>
                                                         {
                                                             user.username
                                                         }
                                                     </span>
-
                                                 </div>
 
                                                 <span className="admin-email">
+
                                                     {user.email}
+
                                                 </span>
 
                                                 <span
@@ -399,6 +404,7 @@ export default function AdminPanel() {
                                                     }
                                                 >
                                                     {user.role}
+
                                                 </span>
 
                                                 <button
@@ -412,57 +418,62 @@ export default function AdminPanel() {
                                                 >
                                                     View recipes
                                                 </button>
-
                                             </div>
                                         )
                                     )}
-
                                 </div>
 
-                                <div className="admin-pagination">
 
-                                    <button
-                                        type="button"
-                                        disabled={
-                                            page === 1
-                                        }
-                                        onClick={() =>
-                                            setPage(
-                                                page - 1
-                                            )
-                                        }
-                                    >
-                                        Previous
-                                    </button>
+                                {/* BACKEND PAGINATION */}
 
-                                    <span>
-                                        Page {page} of{" "}
-                                        {totalPages}
-                                    </span>
+                                {totalPages > 1 && ( // show only if pages are more than 1
 
-                                    <button
-                                        type="button"
-                                        disabled={
-                                            page ===
-                                            totalPages
-                                        }
-                                        onClick={() =>
-                                            setPage(
-                                                page + 1
-                                            )
-                                        }
-                                    >
-                                        Next
-                                    </button>
+                                    <div className="admin-pagination">
 
-                                </div>
+                                        <button
+                                            type="button"
+                                            disabled={
+                                                page === 0
+                                            }
+                                            onClick={
+                                                previousPage
+                                            }
+                                        >
+                                            Previous
+
+                                        </button>
+
+                                        <span>
+
+                                            Page{" "}
+                                            {page + 1}{" "}
+                                            of{" "}
+                                            {totalPages}
+
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            disabled={
+                                                page >=
+                                                totalPages - 1
+                                            }
+                                            onClick={
+                                                nextPage
+                                            }
+                                        >
+
+                                            Next
+
+                                        </button>
+                                    </div>
+                                )}
                             </>
                         )}
-
                 </section>
-
             </div>
 
         </main>
+
     );
 }

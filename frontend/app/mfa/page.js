@@ -74,7 +74,7 @@ export default function MfaPage() {
                         id="mfa-code"
                         type="text"
                         inputMode="numeric"
-                        placeholder="123456"
+                        placeholder="1 2 3 4 5 6"
                         value={code}
                         maxLength={6}
                         onChange={(event) =>

@@ -11,34 +11,17 @@ import {
 export default function RegisterForm() {
     const router = useRouter();
 
-    const [username, setUsername] =
-        useState("");
-    const [email, setEmail] =
-        useState("");
-    const [password, setPassword] =
-        useState("");
-
-    const [error, setError] =
-        useState("");
-    const [loading, setLoading] =
-        useState(false);
-
-    const [passwordStrength, setPasswordStrength] =
-        useState(0);
-
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState(0);
     const hasLength = password.length >= 8;
-
-    const hasUppercase =
-        /[A-Z]/.test(password);
-
-    const hasLowercase =
-        /[a-z]/.test(password);
-
-    const hasNumber =
-        /\d/.test(password); //digit
-
-    const hasSpecial =
-        /[^A-Za-z0-9]/.test(password); // special character
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password); //digit
+    const hasSpecial = /[^A-Za-z0-9]/.test(password); // special character
 
     const isPasswordValid =
         hasLength &&
@@ -162,32 +145,26 @@ export default function RegisterForm() {
                     <div className="password-rules">
 
                         <p>
-                            {hasLength ? "✅" : "❌"} At least
-                            8 characters
+                            {hasLength ? "✅" : "❌"} At least 8 characters
                         </p>
 
                         <p>
-                            {hasUppercase ? "✅" : "❌"} One
-                            uppercase letter
+                            {hasUppercase ? "✅" : "❌"} One uppercase letter
                         </p>
 
                         <p>
-                            {hasLowercase ? "✅" : "❌"} One
-                            lowercase letter
+                            {hasLowercase ? "✅" : "❌"} One lowercase letter
                         </p>
 
                         <p>
-                            {hasNumber ? "✅" : "❌"} One
-                            number
+                            {hasNumber ? "✅" : "❌"} One number
                         </p>
 
                         <p>
-                            {hasSpecial ? "✅" : "❌"} One
-                            special character
+                            {hasSpecial ? "✅" : "❌"} One special character
                         </p>
 
                     </div>
-
 
                 </label>
 

@@ -24,7 +24,7 @@ public class RegisterRequestDTO {
 
   @Pattern(
       regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$",
-      message = "Password must contain uppercase, lowercase and number"
+      message = "Password must contain uppercase, lowercase, special symbol and number"
   )
   private String password;
 }

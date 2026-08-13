@@ -1,14 +1,13 @@
 package com.example.demo.authorization.controller;
 
 import com.example.demo.authorization.model.User;
-import com.example.demo.authorization.repository.UserRepository;
+import com.example.demo.authorization.service.AdminService;
 import com.example.demo.recipe.model.Recipe;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.example.demo.recipe.repository.RecipeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,18 +16,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminController {
 
-  private final UserRepository userRepository;
-  private final RecipeRepository recipeRepository;
+  private final AdminService adminService;
 
   @GetMapping("/users")
-  public List<User> getAllUsers() {
-    return userRepository.findAll();
+  public Page<User> getAllUsers(
+      @RequestParam(defaultValue = "") String search,
+      @PageableDefault(size = 10) Pageable pageable
+  ) {
+    return adminService.getUsers(
+        search,
+        pageable
+    );
   }
 
   @GetMapping("/users/{userId}/recipes")
   public List<Recipe> getUserRecipes(
       @PathVariable Long userId
   ) {
-    return recipeRepository.findAllByUserId(userId);
+    return adminService.getUserRecipes(userId);
   }
 }

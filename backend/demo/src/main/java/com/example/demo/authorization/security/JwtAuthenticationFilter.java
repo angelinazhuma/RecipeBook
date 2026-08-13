@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter
       boolean authenticationMissing =
           SecurityContextHolder.getContext().getAuthentication() == null;
 
-      if ( //
+      if (
           username != null
               && userId != null
               && authenticationMissing

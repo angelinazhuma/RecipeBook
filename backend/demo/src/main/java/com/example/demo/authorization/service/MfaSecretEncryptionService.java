@@ -23,6 +23,9 @@ public class MfaSecretEncryptionService {
   // GCM is a symmetric block cipher mode of operation that provides authenticated encryption.
 
   // No padding - it does not add any padding to the message, because of GCM
+  // NOSuchAlghoritmEXception, javaprobider does not support AESGCM
+  // AESGCM - dont add extra bytes for aligning, tou dont need them
+  //GCm dont need padding for alligning blocks
 
   private static final int IV_LENGTH = 12; // Recommended IV length for GCM is 12 bytes (96 bits)
    // IV is randomly generated order of bytes used with encryption key
@@ -40,42 +43,21 @@ public class MfaSecretEncryptionService {
       byte[] sharedSecret
   ) {
     try {
-      SecretKeySpec key =
-          createAesKey(
-              sharedSecret
-          );
+      SecretKeySpec key = createAesKey(sharedSecret);
 
-      byte[] iv =
-          new byte[IV_LENGTH];
+      byte[] iv = new byte[IV_LENGTH];
 
       secureRandom.nextBytes(iv);
 
-      Cipher cipher =
-          Cipher.getInstance(
-              ALGORITHM
-          );
+      Cipher cipher = Cipher.getInstance(ALGORITHM);
 
-      GCMParameterSpec parameterSpec =
-          new GCMParameterSpec(
-              TAG_LENGTH,
-              iv
-          );
+      GCMParameterSpec parameterSpec = new GCMParameterSpec(TAG_LENGTH, iv);
 
-      cipher.init(
-          Cipher.ENCRYPT_MODE,
-          key,
-          parameterSpec
-      );
+      cipher.init(Cipher.ENCRYPT_MODE, key, parameterSpec);
 
-      byte[] encrypted =
-          cipher.doFinal(
-              value.getBytes(
-                  StandardCharsets.UTF_8
-              )
-          );
+      byte[] encrypted = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
 
-      byte[] combined =
-          ByteBuffer //makes memory for one big array its size is: iv + encrypted
+      byte[] combined = ByteBuffer //makes memory for one big array its size is: iv + encrypted
               .allocate(
                   iv.length +
                       encrypted.length
@@ -84,11 +66,8 @@ public class MfaSecretEncryptionService {
               .put(encrypted)
               .array(); //returns this buffer back to classic byte array
 
-      return Base64
-          .getEncoder()
-          .encodeToString(
-              combined
-          ); // because enctypted is binary, we need to convert it to base64 and returns it
+      return Base64.getEncoder().encodeToString(combined);
+      // because enctypted is binary, we need to convert it to base64 and returns it
 
     } catch (Exception e) {
       throw new IllegalStateException(
@@ -99,58 +78,44 @@ public class MfaSecretEncryptionService {
   }
 
   public String decrypt(
-      String value,
+      String value, // text which i need to decrypt
       byte[] sharedSecret
   ) {
-    try {
-      SecretKeySpec key =
-          createAesKey(
-              sharedSecret
-          );
+    try {SecretKeySpec key = createAesKey(sharedSecret);
 
-      byte[] combined =
-          Base64
-              .getDecoder()
-              .decode(value);
+      byte[] combined = Base64.getDecoder().decode(value); // IV + ENCRYPTES DATA + GCM TAG
 
-      ByteBuffer buffer =
-          ByteBuffer.wrap(
+      ByteBuffer buffer = ByteBuffer.wrap(
               combined // makes byte array to buffer where he can read step by step data from the array
           );
 
-      byte[] iv =
-          new byte[IV_LENGTH];
+      byte[] iv = new byte[IV_LENGTH]; // Take out IV as 12 bytes
 
-      buffer.get(iv);
+      buffer.get(iv); // get() method reads a sequence of bytes from this buffer
 
-      byte[] encrypted =
-          new byte[
+      byte[] encrypted = new byte[
               buffer.remaining()
               ]; // remaining() returns the number of remaining bytes in this buffer
+      //get out the encrypted text
 
       buffer.get(encrypted);
 
-      Cipher cipher =
-          Cipher.getInstance(
-              ALGORITHM
-          );
+      Cipher cipher = Cipher.getInstance(ALGORITHM);
 
-      GCMParameterSpec parameterSpec =
-          new GCMParameterSpec(
-              TAG_LENGTH,
-              iv
-          );
+      GCMParameterSpec parameterSpec = new GCMParameterSpec(TAG_LENGTH, iv);
+      // IV is needed to decrypt the message correctly
+      // tag is for checking that data was not changed or replaced by an attacker
+      // decrypt this data only if the tag is correct and the data was not changed
+
+      // here is the key and here is IV, which was used for encrypting, now decrypt
 
       cipher.init(
-          Cipher.DECRYPT_MODE,
-          key,
-          parameterSpec // gcm parameter spec is used to specify the initialization vector and the authentication tag length
+          Cipher.DECRYPT_MODE, key, parameterSpec
+          // gcm parameter spec is used to specify the initialization vector and the authentication tag length
       );
 
-      byte[] decrypted =
-          cipher.doFinal(
-              encrypted
-          ); //takes authentication tag, checks it and decrypts the message and return back to the array
+      byte[] decrypted = cipher.doFinal(encrypted);
+      //takes authentication tag, checks it and decrypts the message and return back to the array
 
       return new String(
           decrypted,

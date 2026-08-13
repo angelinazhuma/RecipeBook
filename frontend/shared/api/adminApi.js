@@ -2,9 +2,13 @@ const API_URL =
     process.env.NEXT_PUBLIC_API_URL
     || "http://localhost:8080";
 
-export async function fetchAllUsers() {
+export async function fetchAllUsers(
+    page,
+    size,
+    search
+) {
     const response = await fetch(
-        `${API_URL}/admin/users`,
+        `${API_URL}/admin/users?page=${page}&size=${size}&search=${encodeURIComponent(search)}`,
         {
             credentials: "include",
         }
@@ -18,7 +22,6 @@ export async function fetchAllUsers() {
 
     return response.json();
 }
-
 export async function fetchUserRecipes(userId) {
     const response = await fetch(
         `${API_URL}/admin/users/${userId}/recipes`,
